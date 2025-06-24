@@ -192,3 +192,14 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Land Acquisition Pipeline specific
+land_acquisition_config.json
+*.pkl
+cache/
+logs/
+local_processing/
+completed_campaigns/
+campaigns/
+*.xlsx
+*.xls
