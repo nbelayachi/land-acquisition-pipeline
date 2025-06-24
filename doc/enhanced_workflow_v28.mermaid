@@ -1,0 +1,106 @@
+graph TB
+    %% Phase 1: Input Preparation
+    subgraph P1["Phase 1: Land Selection & Input Preparation"]
+        A[Technical Team:<br/>Land Suitability Analysis] --> B[Select Target Parcels<br/>~500-1000 Ha]
+        B --> C[Create Input Excel<br/>7 Required Fields]
+        C --> D{Sezione<br/>Required?}
+        D -->|Yes: Bologna, Valsamoggia| E[Land Manager:<br/>Check SISTER Portal]
+        D -->|No: Most municipalities| F[Launch Campaign]
+        E --> F
+    end
+    
+    %% Phase 2: Data Acquisition & Processing
+    subgraph P2["Phase 2: Automated Pipeline Processing v2.7"]
+        F --> G[campaign_launcher.py<br/>Initialize Campaign]
+        G --> H[land_acquisition_pipeline.py<br/>Process Municipalities]
+        
+        H --> I[Catasto API:<br/>Get Property Owners]
+        I -->|Success| J[Parse Owner Data<br/>Extract All Properties]
+        I -->|Timeout| T1[Save Request ID<br/>for Recovery]
+        
+        J --> K{Owner Type<br/>Classification}
+        K -->|Privato<br/>CF starts with letter| L[Filter Cat.A<br/>Residential Only]
+        K -->|Azienda<br/>CF starts with digit| M[Company Processing]
+        
+        L --> N[Address Cleaning<br/>Remove Floor/Apt Info]
+        M --> O[PEC Email API<br/>Get Certified Email]
+        
+        N --> P[Geocoding API<br/>Enhance Addresses]
+        P -->|Success| Q[Extract ZIP Code<br/>+ 17 Fields]
+        P -->|Timeout| T2[Save for Recovery]
+        
+        Q --> R[Address Quality<br/>Classification v2.7]
+        O --> S[Companies_Found.xlsx]
+    end
+    
+    %% Phase 3: Quality Intelligence
+    subgraph P3["Phase 3: Address Quality Intelligence"]
+        R --> U1{SNC<br/>Check}
+        U1 -->|Yes: No number| V1[LOW Confidence<br/>→ AGENCY]
+        U1 -->|No| U2{Number<br/>Match?}
+        
+        U2 -->|Original = Geocoded| V2[HIGH Confidence<br/>→ DIRECT_MAIL]
+        U2 -->|Original ≠ Geocoded| V3[MEDIUM Confidence<br/>→ DIRECT_MAIL<br/>Use Original]
+        U2 -->|No Original Number| U3{Geocoded<br/>Number?}
+        
+        U3 -->|Yes| V4[LOW: Interpolated<br/>→ AGENCY]
+        U3 -->|No| V5[LOW: No Number<br/>→ AGENCY]
+        
+        V1 --> W[Deduplication:<br/>CF + Address]
+        V2 --> W
+        V3 --> W
+        V4 --> W
+        V5 --> W
+    end
+    
+    %% Phase 4: Output Generation
+    subgraph P4["Phase 4: Output & Distribution"]
+        W --> X[Generate Files]
+        X --> Y1[Validation_Ready.xlsx<br/>Deduplicated Contacts]
+        X --> Y2[Municipality_Summary<br/>13 Business Metrics]
+        X --> Y3[Raw_Data.xlsx<br/>Complete Dataset]
+        
+        S --> Y4[Companies with PEC]
+        
+        Y1 --> Z1[OneDrive Sync]
+        Y2 --> Z1
+        Y3 --> Z1
+        Y4 --> Z1
+        
+        Z1 --> Z2[PowerBI_Dataset.csv<br/>Campaign Analytics]
+    end
+    
+    %% Phase 5: Team Execution
+    subgraph P5["Phase 5: Multi-Channel Outreach"]
+        Y1 --> AA[Land Team:<br/>Review Addresses]
+        AA --> AB{Route by<br/>Channel}
+        
+        AB -->|DIRECT_MAIL<br/>40% typical| AC[Print Service<br/>5-7 days]
+        AB -->|AGENCY<br/>60% typical| AD[Local Agencies<br/>Manual Contact]
+        
+        Y4 --> AE[Business Dev:<br/>PEC Outreach]
+        
+        AC --> AF[Response Tracking]
+        AD --> AF
+        AE --> AF
+    end
+    
+    %% Recovery System
+    T1 --> T3[Timeout Recovery<br/>After Campaign]
+    T2 --> T3
+    T3 -.-> J
+    T3 -.-> Q
+    
+    %% Key Metrics
+    Y2 -.-> M1[Key Metrics:<br/>• 93% Contact Reduction<br/>• 60% Agency Routing<br/>• 100% PEC Success<br/>• €0.50/contact saved]
+    
+    %% Next Priority
+    Z2 ==> NP[🎯 NEXT: Power BI<br/>Dashboard Development]
+    
+    style P1 fill:#e3f2fd
+    style P2 fill:#f3e5f5
+    style P3 fill:#e8f5e9
+    style P4 fill:#fff3e0
+    style P5 fill:#fce4ec
+    style R fill:#4caf50,color:#fff
+    style NP fill:#ffc107,color:#000
