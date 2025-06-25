@@ -203,3 +203,4 @@ completed_campaigns/
 campaigns/
 *.xlsx
 *.xls
+land_acquisition_config.json
