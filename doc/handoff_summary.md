@@ -1,20 +1,26 @@
-# **📦 Agent Handoff Summary - Land Acquisition Pipeline v2.8**
+# **📦 Agent Handoff Summary - Land Acquisition Pipeline v2.9**
 
 **Objective:** This document provides a quick-start guide to the Land Acquisition Pipeline project. It outlines the current state, immediate priorities, and key insights discovered through production data analysis.
 
 ## **🎯 Current Situation**
 
 * **Project**: Land Acquisition Pipeline  
-* **Version**: 2.8 (Production Ready, All Known Bugs Fixed)  
-* **Status**: ✅ PRODUCTION READY
+* **Version**: 2.9 (Production Ready with Enhanced Metrics)  
+* **Status**: ✅ PRODUCTION READY - PENDING IMPLEMENTATION
 
-You are taking ownership of a **mission-critical production system** that automates the Italian land acquisition workflow. Version 2.8 represents the fully debugged and validated pipeline with all v2.7 fixes applied, including the hectare calculation correction.
+You are taking ownership of a **mission-critical production system** that automates the Italian land acquisition workflow. Version 2.9 includes important business feedback: SNC address reclassification and comprehensive funnel tracking.
+
+### **What's New in v2.9**
+- **SNC Address Reclassification**: SNC addresses now HIGH confidence → DIRECT_MAIL (postal service knows these small streets)
+- **Funnel Metrics**: Track parcels and hectares through each processing stage
+- **Company Integration**: Companies tracked both separately and in overall metrics
+- **Output Restructuring**: Single filterable file instead of multiple folders (planned)
 
 ### **What Makes This System Valuable**
 - **93% Contact Reduction**: From 70 raw records to 5 actionable contacts
-- **Intelligent Routing**: 40% direct mail (cheap) vs 60% agency (expensive) based on address quality
+- **Intelligent Routing**: Now with SNC going to direct mail for better coverage
 - **100% PEC Success**: Automatic certified email retrieval for companies
-- **Cost Savings**: €0.50 saved per contact through deduplication and smart routing
+- **Funnel Visibility**: See exactly where parcels/area flow through the process
 
 ## **📚 Documentation Package Overview**
 
@@ -25,21 +31,29 @@ Read these documents in order:
 3. **Strategic Roadmap & Metrics Plan**: Business goals and validated metrics
 4. **Implementation Status Tracker v2.8**: Detailed feature status and bugs fixed
 
-## **🚀 Your First Priority: Campaign Analytics Dashboard**
+## **🚀 Your Immediate Priorities**
 
-The pipeline generates valuable data but lacks historical analysis capabilities. Management cannot track ROI or optimize campaigns without proper visualization.
+### **Priority 1: Implement v2.9 Enhancements**
 
-### **Dashboard Requirements**
-- **Multi-campaign trend analysis** (cost per contact over time)
-- **Address quality insights** (why 60% need expensive agency handling)
-- **Geographic success patterns** (which regions respond best)
-- **Channel effectiveness** (direct mail vs agency ROI)
-- **Drill-down capabilities** (campaign → municipality → individual metrics)
+1. **Update Address Classification**
+   - Change SNC from LOW → HIGH confidence
+   - Route SNC addresses to DIRECT_MAIL channel
+   - Update quality notes to reflect postal service knowledge
 
-### **Available Data**
-- `PowerBI_Dataset.csv` generated for each campaign
-- 13+ validated business metrics per municipality
-- Historical campaign data in OneDrive folders
+2. **Add Funnel Metrics**
+   - Track parcels and hectares at each stage
+   - Show retention rates through filters
+   - Separate company metrics while including in totals
+   - Enable management visibility into process impact
+
+3. **Restructure Output** (Future)
+   - Create single filterable file
+   - Eliminate multiple folders
+   - Maintain all functionality in unified format
+
+### **Priority 2: Campaign Analytics Dashboard**
+
+Once v2.9 is implemented, build Power BI dashboards that leverage the new funnel metrics for deeper insights.
 
 ## **✅ Recent Achievements (v2.7 → v2.8)**
 
@@ -50,20 +64,30 @@ The pipeline generates valuable data but lacks historical analysis capabilities.
 
 ## **🔍 Key Insights from Production Data**
 
-### **The Contact Funnel**
+### **The Enhanced Contact Funnel (v2.9)**
 ```
-1 Parcel → 70 Raw Records → 3 Unique Owners → 5 Addresses → 2 Direct Mail Ready
+Input: X Parcels (Y Hectares)
+    ↓ API Success
+X1 Parcels with owner data (Y1 Hectares)
+    ↓ Owner Classification
+X2 Private + X3 Company parcels
+    ↓ Cat.A Filter (Private only)
+X4 Residential parcels (Y4 Hectares)
+    ↓ Deduplication
+5 Unique contacts from 70 raw records
+    ↓ Quality Routing
+2 Direct Mail + 3 Agency contacts
 ```
 
-### **Address Quality Distribution**
-- **HIGH Confidence**: 0% (perfect addresses are rare)
+### **Address Quality Distribution (Updated)**
+- **HIGH Confidence**: SNC addresses (small known streets) + perfect matches
 - **MEDIUM Confidence**: 40% (minor issues, still mailable)
-- **LOW Confidence**: 60% (missing numbers, requires agency)
+- **LOW Confidence**: Missing/interpolated numbers (requires agency)
 
-### **Cost Implications**
-- Direct mail: ~€0.20 per contact
-- Agency handling: ~€0.70 per contact
-- Current 60% agency rate costs extra €0.50 × 60% = €0.30 per contact
+### **Company Handling**
+- Companies bypass Cat.A filter (not residential)
+- 100% reachable via PEC email
+- Tracked separately but included in overall metrics
 
 ## **💡 Strategic Opportunities**
 
@@ -83,10 +107,19 @@ The pipeline generates valuable data but lacks historical analysis capabilities.
 
 ## **📊 Critical Metrics to Track**
 
+### **Funnel Metrics (NEW in v2.9)**
+1. **Input Coverage** = Total hectares scouted
+2. **API Success Rate** = Parcels with data / Input parcels
+3. **Owner Distribution** = Private vs Company split (parcels & hectares)
+4. **Cat.A Filter Impact** = Residential parcels / Private parcels
+5. **Area Retention** = Hectares at each stage / Input hectares
+6. **Contact Efficiency** = Unique contacts / Parcels processed
+
+### **Business Metrics**
 1. **Contact Acquisition Cost** = Total Campaign Cost / Mailable Contacts
-2. **Effective Reach Rate** = Direct Mail Contacts / Input Parcels  
-3. **Address Quality Score** = High+Medium Confidence / Total Addresses
-4. **Deduplication Savings** = (Raw Records - Unique Contacts) × €0.20
+2. **Channel Distribution** = Direct Mail vs Agency (contacts & hectares)
+3. **Deduplication Savings** = (Raw Records - Unique Contacts) × €0.20
+4. **Company Reach** = Companies with PEC / Total companies
 
 ## **🔧 Technical Environment**
 

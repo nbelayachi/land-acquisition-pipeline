@@ -10,7 +10,7 @@ graph TB
     end
     
     %% Phase 2: Data Acquisition & Processing
-    subgraph P2["Phase 2: Automated Pipeline Processing v2.7"]
+    subgraph P2["Phase 2: Automated Pipeline Processing v2.9"]
         F --> G[campaign_launcher.py<br/>Initialize Campaign]
         G --> H[land_acquisition_pipeline.py<br/>Process Municipalities]
         
@@ -29,14 +29,14 @@ graph TB
         P -->|Success| Q[Extract ZIP Code<br/>+ 17 Fields]
         P -->|Timeout| T2[Save for Recovery]
         
-        Q --> R[Address Quality<br/>Classification v2.7]
+        Q --> R[Address Quality<br/>Classification v2.9]
         O --> S[Companies_Found.xlsx]
     end
     
     %% Phase 3: Quality Intelligence
-    subgraph P3["Phase 3: Address Quality Intelligence"]
+    subgraph P3["Phase 3: Address Quality Intelligence v2.9"]
         R --> U1{SNC<br/>Check}
-        U1 -->|Yes: No number| V1[LOW Confidence<br/>→ AGENCY]
+        U1 -->|Yes: Small street| V1[HIGH Confidence<br/>→ DIRECT_MAIL]
         U1 -->|No| U2{Number<br/>Match?}
         
         U2 -->|Original = Geocoded| V2[HIGH Confidence<br/>→ DIRECT_MAIL]
@@ -53,11 +53,11 @@ graph TB
         V5 --> W
     end
     
-    %% Phase 4: Output Generation
-    subgraph P4["Phase 4: Output & Distribution"]
-        W --> X[Generate Files]
+    %% Phase 4: Output Generation with Funnel Tracking
+    subgraph P4["Phase 4: Output & Funnel Analytics"]
+        W --> X[Generate Files<br/>Track Funnel Metrics]
         X --> Y1[Validation_Ready.xlsx<br/>Deduplicated Contacts]
-        X --> Y2[Municipality_Summary<br/>13 Business Metrics]
+        X --> Y2[Municipality_Summary<br/>15+ Metrics + Funnel Data]
         X --> Y3[Raw_Data.xlsx<br/>Complete Dataset]
         
         S --> Y4[Companies with PEC]
@@ -75,8 +75,8 @@ graph TB
         Y1 --> AA[Land Team:<br/>Review Addresses]
         AA --> AB{Route by<br/>Channel}
         
-        AB -->|DIRECT_MAIL<br/>40% typical| AC[Print Service<br/>5-7 days]
-        AB -->|AGENCY<br/>60% typical| AD[Local Agencies<br/>Manual Contact]
+        AB -->|DIRECT_MAIL<br/>50%+ with SNC| AC[Print Service<br/>5-7 days]
+        AB -->|AGENCY<br/><50% expected| AD[Local Agencies<br/>Manual Contact]
         
         Y4 --> AE[Business Dev:<br/>PEC Outreach]
         
@@ -91,11 +91,14 @@ graph TB
     T3 -.-> J
     T3 -.-> Q
     
-    %% Key Metrics
-    Y2 -.-> M1[Key Metrics:<br/>• 93% Contact Reduction<br/>• 60% Agency Routing<br/>• 100% PEC Success<br/>• €0.50/contact saved]
+    %% Funnel Tracking
+    H -.-> FM[Funnel Metrics:<br/>• Input: X parcels, Y hectares<br/>• After API: X1 parcels, Y1 ha<br/>• Private: X2, Company: X3<br/>• After Cat.A: X4 parcels, Y4 ha<br/>• Final: X5 contacts]
+    
+    %% Key Improvements v2.9
+    Y2 -.-> M1[v2.9 Enhancements:<br/>• SNC → Direct Mail<br/>• Full Funnel Visibility<br/>• Company Integration<br/>• 50%+ Direct Mail Rate]
     
     %% Next Priority
-    Z2 ==> NP[🎯 NEXT: Power BI<br/>Dashboard Development]
+    Z2 ==> NP[🎯 NEXT: Single File<br/>Output Structure]
     
     style P1 fill:#e3f2fd
     style P2 fill:#f3e5f5
@@ -103,4 +106,6 @@ graph TB
     style P4 fill:#fff3e0
     style P5 fill:#fce4ec
     style R fill:#4caf50,color:#fff
+    style V1 fill:#81c784,color:#000
+    style FM fill:#ffeb3b,color:#000
     style NP fill:#ffc107,color:#000
