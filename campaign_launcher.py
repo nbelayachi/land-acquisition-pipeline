@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-# Testing Git workflow - this is a test change
-# -*- coding: utf-8 -*-
-
 """
-Enhanced Land Acquisition Campaign Launcher with Geocoding Support
+Enhanced Land Acquisition Campaign Launcher with Geocoding Support and Funnel Tracking
 Clean interface for real estate campaigns with OneDrive integration and address enhancement
 
 @author: Real Estate Pipeline Optimizer - Enhanced Edition
-VERSION: 2.7
+VERSION: 2.9 (with SNC reclassification and funnel metrics)
 """
 
 import json
@@ -48,7 +45,7 @@ class EnhancedLandAcquisitionCampaignLauncher:
         geocoding_enabled, geocoding_status = self.check_geocoding_setup()
         
         print("\n" + "="*80)
-        print("🏗️ ENHANCED LAND ACQUISITION CAMPAIGN LAUNCHER")
+        print("🏗️ ENHANCED LAND ACQUISITION CAMPAIGN LAUNCHER v2.9")
         print("CP-Municipality Processing with OneDrive Team Sharing + Address Enhancement")
         print("="*80)
         print()
@@ -65,12 +62,18 @@ class EnhancedLandAcquisitionCampaignLauncher:
         print("• Tracks costs with manual balance method")
         print("• Supports Sezione field when provided")
         
+        print("\n🆕 NEW IN v2.9:")
+        print("• 📮 SNC addresses now go to DIRECT_MAIL (postal service knows them)")
+        print("• 📊 Complete funnel tracking (parcels + hectares at each stage)")
+        print("• 🏢 Separate company metrics while including in totals")
+        print("• 📈 Enhanced Power BI dataset with funnel visibility")
+        
         if geocoding_enabled:
-            print("• 🗺️ ENHANCES ADDRESSES with ZIP codes and coordinates")
+            print("\n• 🗺️ ENHANCES ADDRESSES with ZIP codes and coordinates")
             print("• 📮 Creates postal-ready Italian formatted addresses")
             print("• 📍 Adds geographic data for mapping and analysis")
         else:
-            print(f"• 🗺️ Address enhancement: {geocoding_status}")
+            print(f"\n• 🗺️ Address enhancement: {geocoding_status}")
             if "MISSING TOKEN" in geocoding_status:
                 print("  ⚠️  Configure geocoding token to enable address enhancement")
         print()
@@ -242,6 +245,10 @@ class EnhancedLandAcquisitionCampaignLauncher:
         else:
             print(f"🗺️  Address Enhancement: {geocoding_status}")
         
+        # v2.9 features
+        print(f"📊 Funnel Tracking: ✅ ENABLED (v2.9)")
+        print(f"📮 SNC Routing: ✅ DIRECT_MAIL (v2.9)")
+        
         print()
         
         print("📋 CP-Municipality Breakdown:")
@@ -284,10 +291,11 @@ class EnhancedLandAcquisitionCampaignLauncher:
                 else:
                     print(f"      📄 Validation_Ready.xlsx  ← For Land Acquisition Team review")
                 print(f"      📄 Companies_Found.xlsx    ← Companies detected (if any)")
+                print(f"      📄 Funnel_Analysis.xlsx    ← NEW! Parcel/hectare flow (v2.9)")
                 print(f"      📄 {municipality_key}_Complete_Results.xlsx")
         
         print(f"   📄 Campaign_Summary.xlsx  ← Overview for management")
-        print(f"   📄 PowerBI_Dataset.csv   ← For your Power BI dashboard")
+        print(f"   📄 PowerBI_Dataset.csv   ← Enhanced with funnel metrics (v2.9)")
         print(f"   📄 Enhanced_Cost_Summary.txt  ← Campaign cost breakdown")
         print()
         print("👥 TEAM ACCESS:")
@@ -296,13 +304,16 @@ class EnhancedLandAcquisitionCampaignLauncher:
             print(f"     - ZIP codes in 'Poste_Address' column")
             print(f"     - Postal-ready addresses in 'Geocoded_Address_Italian' column")
             print(f"     - Geographic coordinates for mapping")
+            print(f"     - SNC addresses now marked for DIRECT_MAIL (v2.9)")
             print(f"   • Business Development: Reviews 'Companies_Found.xlsx' files")
             print(f"     - Company properties for B2B opportunities")
+            print(f"   • Management: Views funnel metrics in new sheets (v2.9)")
         else:
             print(f"   • Land Acquisition: Reviews 'Validation_Ready.xlsx' files")
+            print(f"     - SNC addresses now marked for DIRECT_MAIL (v2.9)")
             print(f"   • Business Development: Reviews 'Companies_Found.xlsx' files")
-        print(f"   • Management: Views 'Campaign_Summary.xlsx' and Power BI")
-        print(f"   • You: Use 'PowerBI_Dataset.csv' to update dashboard")
+            print(f"   • Management: Views funnel metrics in new sheets (v2.9)")
+        print(f"   • You: Use enhanced 'PowerBI_Dataset.csv' to update dashboard")
         print()
     
     def show_processing_summary(self, analysis):
@@ -331,6 +342,11 @@ class EnhancedLandAcquisitionCampaignLauncher:
         else:
             print(f"   🗺️  Address enhancement: {geocoding_status}")
         
+        print(f"\n🆕 v2.9 Enhancements:")
+        print(f"   📮 SNC addresses → DIRECT_MAIL (postal service knows them)")
+        print(f"   📊 Funnel tracking → See parcel/hectare flow at each stage")
+        print(f"   🏢 Company metrics → Separate tracking, total visibility")
+        
         print()
         print(f"📁 Will create:")
         print(f"   • {municipality_count} municipality folders")
@@ -339,7 +355,8 @@ class EnhancedLandAcquisitionCampaignLauncher:
         else:
             print(f"   • {municipality_count} 'Validation_Ready.xlsx' files")
         print(f"   • Company files when companies are detected")
-        print(f"   • 1 Power BI dataset with all metrics")
+        print(f"   • Funnel analysis sheets showing data flow (v2.9)")
+        print(f"   • 1 Power BI dataset with funnel metrics")
         print(f"   • 1 comprehensive campaign summary")
         print()
         
@@ -362,23 +379,31 @@ class EnhancedLandAcquisitionCampaignLauncher:
         else:
             print(f"Address Enhancement: ❌ DISABLED")
         
+        print(f"SNC Routing: ✅ DIRECT_MAIL (v2.9 - postal service update)")
+        print(f"Funnel Tracking: ✅ ENABLED (v2.9 - complete visibility)")
+        
         print()
         print("🔄 What will happen:")
         print("   1. ✅ Auto-create municipality folders")
         print("   2. 🔄 Process each municipality through Land Registry API")
-        print("   3. 🏢 Separate companies from individuals automatically")
-        print("   4. 🧹 Generate cleaned 'Validation_Ready' sheets for individuals")
+        print("   3. 📊 Track parcels/hectares through each processing stage (v2.9)")
+        print("   4. 🏢 Separate companies from individuals automatically")
+        print("   5. 🧹 Generate cleaned 'Validation_Ready' sheets for individuals")
         if geocoding_enabled:
-            print("   5. 🗺️  Enhance addresses with ZIP codes and coordinates")
-            print("   6. 🏢 Create 'Companies_Found.xlsx' files when applicable")
-            print("   7. 📊 Create Power BI dataset with all metrics")
-            print("   8. 📋 Generate comprehensive campaign dashboard")
-            print("   9. 📁 Copy results to OneDrive for team access")
+            print("   6. 🗺️  Enhance addresses with ZIP codes and coordinates")
+            print("   7. 📮 Route SNC addresses to DIRECT_MAIL (v2.9)")
+            print("   8. 🏢 Create 'Companies_Found.xlsx' files when applicable")
+            print("   9. 📊 Create funnel analysis showing data flow (v2.9)")
+            print("   10. 📊 Create Power BI dataset with all metrics")
+            print("   11. 📋 Generate comprehensive campaign dashboard")
+            print("   12. 📁 Copy results to OneDrive for team access")
         else:
-            print("   5. 🏢 Create 'Companies_Found.xlsx' files when applicable")
-            print("   6. 📊 Create Power BI dataset")
-            print("   7. 📋 Generate campaign dashboard")
-            print("   8. 📁 Copy results to OneDrive for team access")
+            print("   6. 📮 Route SNC addresses to DIRECT_MAIL (v2.9)")
+            print("   7. 🏢 Create 'Companies_Found.xlsx' files when applicable")
+            print("   8. 📊 Create funnel analysis showing data flow (v2.9)")
+            print("   9. 📊 Create Power BI dataset")
+            print("   10. 📋 Generate campaign dashboard")
+            print("   11. 📁 Copy results to OneDrive for team access")
         print()
         
         while True:
@@ -434,14 +459,18 @@ class EnhancedLandAcquisitionCampaignLauncher:
                 "powerbi_enabled": self.config.get('powerbi_integration', {}).get('enabled', True),
                 "onedrive_enabled": self.config.get('output_structure', {}).get('auto_copy_to_onedrive', True),
                 "geocoding_enabled": geocoding_enabled,
-                "geocoding_token": self.config.get('geocoding_settings', {}).get('token') if geocoding_enabled else None
+                "geocoding_token": self.config.get('geocoding_settings', {}).get('token') if geocoding_enabled else None,
+                "funnel_tracking_enabled": True,  # v2.9
+                "snc_direct_mail_routing": True  # v2.9
             },
             "expected_outputs": {
                 "municipality_folders": int(analysis['total_municipalities']),
                 "validation_ready_sheets": int(analysis['total_municipalities']),
                 "powerbi_dataset": True,
                 "campaign_dashboard": True,
-                "geocoding_enhancement": geocoding_enabled
+                "geocoding_enhancement": geocoding_enabled,
+                "funnel_analysis_sheets": True,  # v2.9
+                "enhanced_company_tracking": True  # v2.9
             }
         }
         
@@ -473,17 +502,24 @@ class EnhancedLandAcquisitionCampaignLauncher:
         template = f"""
 📧 EMAIL TEMPLATE FOR TEAM NOTIFICATION:
 
-Subject: Enhanced Land Acquisition Campaign Completed - {campaign_name}
+Subject: Enhanced Land Acquisition Campaign Completed - {campaign_name} (v2.9)
 
 Hi Team,
 
-Campaign "{campaign_name}" has been completed and results are available in OneDrive.
+Campaign "{campaign_name}" has been completed with v2.9 enhancements and results are available in OneDrive.
 
 📁 Location: OneDrive > Italy - Documentos > Origination > 1. Land > Campaigns > test_workflow > Campaigns > {campaign_name}
+
+🆕 NEW IN v2.9:
+• SNC addresses now routed to DIRECT_MAIL (postal service knows these streets)
+• Complete funnel visibility showing parcel/hectare flow through each stage
+• Separate company tracking while maintaining total visibility
+• Enhanced Power BI dataset with funnel metrics
 
 📋 For Land Acquisition Team:
 • {analysis['total_municipalities']} municipalities processed
 • Review "Validation_Ready.xlsx" files in each municipality folder
+• SNC addresses are now marked for DIRECT_MAIL (postal service update)
 • Focus on addresses with complete data first
 • Expected validation-ready records: ~{analysis['total_parcels'] // 3}
 {geocoding_section}
@@ -495,8 +531,9 @@ Campaign "{campaign_name}" has been completed and results are available in OneDr
 
 📊 For Management:
 • View "Campaign_Summary.xlsx" for overview
-• Basic Power BI dataset available (enhanced dashboards coming soon)
-• Geographic data now available for mapping analysis
+• NEW: Check "Funnel_Analysis" sheets for parcel/hectare flow visibility
+• Power BI dataset now includes complete funnel metrics
+• Geographic data available for mapping analysis
 
 💰 Campaign Cost: Will be provided after manual balance check
 
@@ -511,14 +548,19 @@ Best regards,
         """Show steps to update Power BI dashboard with geocoding metrics"""
         geocoding_enabled, _ = self.check_geocoding_setup()
         
-        print(f"\n📊 POWER BI NEXT STEPS")
+        print(f"\n📊 POWER BI NEXT STEPS (v2.9)")
         print("="*40)
-        print("⚠️  Note: Current Power BI integration is basic - future versions will include enhanced dashboards")
+        print("⚠️  Note: Power BI dataset now includes v2.9 funnel metrics")
         print()
         print("1. 📁 Find PowerBI_Dataset.csv in campaign folder")
         print("2. 📊 Open your Land Acquisition Power BI file (or create new)")
         print("3. 🔄 Import/refresh data with new CSV")
-        print("4. 📈 Create basic charts with campaign metrics")
+        print("4. 📈 Create funnel visualizations with new metrics:")
+        print("   • Input_Parcels / Input_Area_Ha")
+        print("   • After_API_Parcels / After_API_Area_Ha")
+        print("   • Private vs Company owner distribution")
+        print("   • Cat.A filter impact on parcels/hectares")
+        print("   • Final routing distribution (Direct Mail vs Agency)")
         if geocoding_enabled:
             print("5. 🗺️  Add geocoding metrics if needed:")
             print("   • Address enhancement success rates")
@@ -528,12 +570,13 @@ Best regards,
             print("5. 📈 Create standard metrics charts")
         print("6. 📤 Share results with management")
         print()
-        print("💡 Current dataset includes:")
+        print("💡 v2.9 dataset includes:")
+        print("   • Complete funnel metrics (parcels + hectares)")
         print("   • Campaign progress by CP/municipality")
-        print("   • Basic processing metrics")
+        print("   • Company metrics (separate + total)")
         if geocoding_enabled:
             print("   • Geocoding success rates")
-        print("   • Cost tracking")
+        print("   • Cost tracking with recovery metrics")
         print()
         print("🔮 Future enhancements will include:")
         print("   • Pre-built dashboard templates")
@@ -597,6 +640,9 @@ Best regards,
             print("🗺️  Addresses will be enhanced with ZIP codes and coordinates")
         else:
             print("⚠️  Address enhancement disabled - configure geocoding token to enable")
+        
+        print("📮 SNC addresses will be routed to DIRECT_MAIL (v2.9)")
+        print("📊 Complete funnel tracking will show parcel/hectare flow")
         
         # Show team notification template
         template = self.create_team_notification_template(campaign_name, analysis)
