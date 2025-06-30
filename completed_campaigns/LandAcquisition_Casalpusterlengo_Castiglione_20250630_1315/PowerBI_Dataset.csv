@@ -1,0 +1,6 @@
+﻿Campaign_Date,Campaign_Name,Municipality_Key,CP,Municipality,Input_Parcels,API_Success_Rate,Unique_Individual_Owners,Unique_Company_Owners,Unique_Owner_Address_Pairs,Direct_Mail_Final_Contacts,Direct_Mail_Final_Area_Ha,Agency_Final_Contacts,Agency_Final_Area_Ha,Campaign_Cost,Timeout_Requests,Successful_Recoveries,Recovery_Cost_Saved
+2025-06-30,LandAcquisition_Casalpusterlengo_Castiglione_20250630_1315,Mun_001,Casalpusterlengo,Casalpusterlengo,2,100.0,1,0,6,0,0.0,1,10.82,0.0,0,0,0.0
+2025-06-30,LandAcquisition_Casalpusterlengo_Castiglione_20250630_1315,Mun_002,Casalpusterlengo,Ospedaletto Lodigiano,3,100.0,2,0,8,2,33.67,1,24.67,0.0,0,0,0.0
+2025-06-30,LandAcquisition_Casalpusterlengo_Castiglione_20250630_1315,Mun_003,Castiglione,Carpenedolo,2,100.0,6,0,6,6,5.529999999999999,0,0.0,0.0,0,0,0.0
+2025-06-30,LandAcquisition_Casalpusterlengo_Castiglione_20250630_1315,Mun_004,Castiglione,Castiglione Delle Stiviere,1,100.0,1,0,0,0,0.0,0,0.0,0.0,0,0,0.0
+2025-06-30,LandAcquisition_Casalpusterlengo_Castiglione_20250630_1315,Mun_005,Castiglione,Montichiari,2,100.0,3,0,3,1,2.96,1,2.96,0.0,0,0,0.0

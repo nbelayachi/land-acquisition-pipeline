@@ -612,27 +612,8 @@ class IntegratedLandAcquisitionPipeline:
                 "API_Success_Rate": summary_metrics.get("API_Success_Rate", 0.0),
                 "Unique_Individual_Owners": summary_metrics.get("Unique_Individual_Owners", 0),
                 "Unique_Company_Owners": summary_metrics.get("Unique_Company_Owners", 0),
-                "High_Confidence_Direct_Mail": summary_metrics.get("High_Confidence_Direct_Mail", 0),
-                "Agency_Required_Final": summary_metrics.get("Agency_Required_Final", 0),
-                "Interpolation_Risks_Detected": summary_metrics.get("Interpolation_Risks_Detected", 0),
-                "Category_A_Filter_Rate": summary_metrics.get("Category_A_Filter_Rate", 0.0),
-                "Address_Geocoding_Success_Rate": summary_metrics.get("Address_Geocoding_Success_Rate", 0.0),
-                "Companies_With_PEC": summary_metrics.get("Companies_With_PEC", 0),
-                "PEC_Success_Rate": summary_metrics.get("PEC_Success_Rate", 0.0),
-                "Hectares_Direct_Mail": summary_metrics.get("Hectares_Direct_Mail", 0.0),
-                "Hectares_Agency_Required": summary_metrics.get("Hectares_Agency_Required", 0.0),
-
-                # NEW v2.9: Funnel metrics
-                "Input_Area_Ha": summary_metrics.get("Input_Area_Ha", 0),
-                "After_API_Parcels": summary_metrics.get("After_API_Parcels", 0),
-                "After_API_Area_Ha": summary_metrics.get("After_API_Area_Ha", 0),
-                "Private_Owner_Parcels": summary_metrics.get("Private_Owner_Parcels", 0),
-                "Private_Owner_Area_Ha": summary_metrics.get("Private_Owner_Area_Ha", 0),
-                "Company_Owner_Parcels": summary_metrics.get("Company_Owner_Parcels", 0),
-                "Company_Owner_Area_Ha": summary_metrics.get("Company_Owner_Area_Ha", 0),
-                "After_CatA_Filter_Parcels": summary_metrics.get("After_CatA_Filter_Parcels", 0),
-                "After_CatA_Filter_Area_Ha": summary_metrics.get("After_CatA_Filter_Area_Ha", 0),
-                "Unique_Contacts_Generated": summary_metrics.get("Unique_Contacts_Generated", 0),
+                # REVISED v2.9.2
+                "Unique_Owner_Address_Pairs": summary_metrics.get("Unique_Owner_Address_Pairs", 0),
                 "Direct_Mail_Final_Contacts": summary_metrics.get("Direct_Mail_Final_Contacts", 0),
                 "Direct_Mail_Final_Area_Ha": summary_metrics.get("Direct_Mail_Final_Area_Ha", 0),
                 "Agency_Final_Contacts": summary_metrics.get("Agency_Final_Contacts", 0),
@@ -651,6 +632,16 @@ class IntegratedLandAcquisitionPipeline:
             powerbi_file = os.path.join(campaign_dir, "PowerBI_Dataset.csv")
             powerbi_df.to_csv(powerbi_file, index=False, encoding='utf-8-sig')
             print(f"   📊 Power BI dataset created with enhanced metrics and funnel data: {os.path.basename(powerbi_file)}")
+
+    def is_province_match(self, original_address, geocoded_province_code):
+        """v2.9.1: Helper function to check if geocoded province matches original."""
+        if not isinstance(original_address, str) or not isinstance(geocoded_province_code, str):
+            return False
+        match = re.search(r'\(([A-Z]{2})\)', original_address.upper())
+        if match:
+            original_province_code = match.group(1)
+            return original_province_code == geocoded_province_code.upper()
+        return False
 
     def classify_address_quality(self, row):
         """
@@ -678,15 +669,25 @@ class IntegratedLandAcquisitionPipeline:
         original_num = extract_street_number(original)
         geocoded_num = extract_street_number(geocoded) if has_geocoding else None
         
-        # v2.9 CHANGE: SNC addresses now HIGH confidence and DIRECT_MAIL
+        # v2.9.2 REVISION: SNC addresses are now MEDIUM confidence and routed to AGENCY
         if 'SNC' in original.upper():
-            return {
-                'Address_Confidence': 'HIGH', 
-                'Interpolation_Risk': False, 
-                'Best_Address': original, 
-                'Routing_Channel': 'DIRECT_MAIL', 
-                'Quality_Notes': 'SNC address - small street known to postal service'
-            }
+            # Province match check is still valuable to avoid major geocoding errors
+            if has_geocoding and self.is_province_match(original, row.get('Province_Code')):
+                return {
+                    'Address_Confidence': 'MEDIUM', 
+                    'Interpolation_Risk': False, 
+                    'Best_Address': original, 
+                    'Routing_Channel': 'AGENCY', 
+                    'Quality_Notes': 'SNC address - province match verified'
+                }
+            else:
+                return {
+                    'Address_Confidence': 'LOW', 
+                    'Interpolation_Risk': True, 
+                    'Best_Address': original, 
+                    'Routing_Channel': 'AGENCY', 
+                    'Quality_Notes': 'SNC address - geocoding failed or province mismatch'
+                }
         
         elif original_num and geocoded_num and original_num == geocoded_num:
             return {'Address_Confidence': 'HIGH', 'Interpolation_Risk': False, 'Best_Address': geocoded, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': 'Complete and verified address'}
@@ -695,7 +696,7 @@ class IntegratedLandAcquisitionPipeline:
             return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': True, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Number mismatch. Using original number "{original_num}" instead of geocoded "{geocoded_num}"'}
         
         elif not original_num and geocoded_num:
-            return {'Address_Confidence': 'LOW', 'Interpolation_Risk': True, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': f'Number "{geocoded_num}" likely interpolated by geocoding API'}
+            return {'Address_Confidence': 'LOW', 'Interpolation_Risk': True, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': 'Address has no number, geocoding API suggested one'}
         
         elif original_num and not geocoded_num:
              return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': False, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Original address has number "{original_num}", but it could not be verified by geocoding.'}
@@ -818,7 +819,7 @@ Best,
     def create_municipality_summary(self, municipality_key, municipality_data, df_raw, validation_ready, companies_found=None, funnel_metrics=None):
         """
         Creates an enhanced municipality summary with high-impact business metrics and funnel data.
-        v2.9: Now includes comprehensive funnel metrics
+        v2.9.2: Corrected summary logic for contacts and area; renamed/removed metrics.
         """
         # Standardize Area column before calculation
         if 'Area' in validation_ready.columns:
@@ -842,23 +843,27 @@ Best,
             geocoding_success_count = len(validation_ready[validation_ready['Geocoding_Status'] == 'Success'])
         address_geocoding_success_rate = (geocoding_success_count / len(validation_ready)) * 100 if len(validation_ready) > 0 else 0
 
-        high_confidence_contacts = 0
-        agency_required_contacts = 0
-        interpolation_risks = 0
+        # v2.9.2: Revised metric calculations
+        direct_mail_contacts = 0
+        agency_contacts = 0
         hectares_direct_mail = 0.0
-        hectares_agency_required = 0.0
+        hectares_agency = 0.0
+        interpolation_risks = 0
 
-        if 'Address_Confidence' in validation_ready.columns and 'Area' in validation_ready.columns:
+        if not validation_ready.empty and 'Routing_Channel' in validation_ready.columns:
             direct_mail_df = validation_ready[validation_ready['Routing_Channel'] == 'DIRECT_MAIL']
             agency_df = validation_ready[validation_ready['Routing_Channel'] == 'AGENCY']
 
-            high_confidence_contacts = len(direct_mail_df[direct_mail_df['Address_Confidence'] == 'HIGH'])
-            agency_required_contacts = len(agency_df)
+            # Count unique owners (cf) in each channel
+            direct_mail_contacts = direct_mail_df['cf'].nunique()
+            agency_contacts = agency_df['cf'].nunique()
+
+            # Sum area of unique parcels in each channel
+            hectares_direct_mail = direct_mail_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
+            hectares_agency = agency_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
+
             interpolation_risks = len(validation_ready[validation_ready['Interpolation_Risk'] == True])
-            
-            hectares_direct_mail = direct_mail_df['Area'].sum()
-            hectares_agency_required = agency_df['Area'].sum()
-        
+
         companies_with_pec = 0
         pec_success_rate = 0.0
         if companies_found is not None and not companies_found.empty and 'pec_status' in companies_found.columns:
@@ -873,17 +878,14 @@ Best,
             "API_Success_Rate": api_success_rate,
             "Unique_Individual_Owners": len(individual_cfs),
             "Unique_Company_Owners": len(company_cfs),
-            "High_Confidence_Direct_Mail": high_confidence_contacts,
-            "Agency_Required_Final": agency_required_contacts,
             "Interpolation_Risks_Detected": interpolation_risks,
             "Hectares_Direct_Mail": hectares_direct_mail,
-            "Hectares_Agency_Required": hectares_agency_required,
             "Companies_With_PEC": companies_with_pec,
             "PEC_Success_Rate": pec_success_rate,
             "Category_A_Filter_Rate": category_a_filter_rate,
             "Address_Geocoding_Success_Rate": address_geocoding_success_rate,
             
-            # NEW v2.9: Funnel Metrics
+            # REVISED v2.9.2: Funnel Metrics
             "Input_Area_Ha": funnel_metrics.get("input_area_ha", 0) if funnel_metrics else 0,
             "After_API_Parcels": funnel_metrics.get("after_api_parcels", 0) if funnel_metrics else 0,
             "After_API_Area_Ha": funnel_metrics.get("after_api_area_ha", 0) if funnel_metrics else 0,
@@ -893,11 +895,11 @@ Best,
             "Company_Owner_Area_Ha": funnel_metrics.get("company_owner_area_ha", 0) if funnel_metrics else 0,
             "After_CatA_Filter_Parcels": funnel_metrics.get("after_cata_filter_parcels", 0) if funnel_metrics else 0,
             "After_CatA_Filter_Area_Ha": funnel_metrics.get("after_cata_filter_area_ha", 0) if funnel_metrics else 0,
-            "Unique_Contacts_Generated": funnel_metrics.get("unique_contacts", 0) if funnel_metrics else 0,
-            "Direct_Mail_Final_Contacts": funnel_metrics.get("direct_mail_contacts", 0) if funnel_metrics else 0,
-            "Direct_Mail_Final_Area_Ha": funnel_metrics.get("direct_mail_area_ha", 0) if funnel_metrics else 0,
-            "Agency_Final_Contacts": funnel_metrics.get("agency_contacts", 0) if funnel_metrics else 0,
-            "Agency_Final_Area_Ha": funnel_metrics.get("agency_area_ha", 0) if funnel_metrics else 0,
+            "Unique_Owner_Address_Pairs": funnel_metrics.get("unique_contacts", 0) if funnel_metrics else 0, # RENAMED
+            "Direct_Mail_Final_Contacts": direct_mail_contacts, # REVISED
+            "Direct_Mail_Final_Area_Ha": hectares_direct_mail, # REVISED
+            "Agency_Final_Contacts": agency_contacts, # REVISED
+            "Agency_Final_Area_Ha": hectares_agency, # REVISED
         }
         
         return summary_dict
@@ -1400,9 +1402,10 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                 validation_ready = self.enhance_addresses_with_geocoding(validation_ready)
                 classification_results = validation_ready.apply(self.classify_address_quality, axis=1).apply(pd.Series)
                 validation_ready = pd.concat([validation_ready, classification_results], axis=1)
-            validation_ready.drop_duplicates(subset=['cf', 'cleaned_ubicazione'], inplace=True)
+            # v2.9.1 BUG FIX: Preserve unique parcels by including foglio/particella in deduplication
+            validation_ready.drop_duplicates(subset=['cf', 'cleaned_ubicazione', 'foglio_input', 'particella_input'], inplace=True)
             
-            # v2.9: Track final deduplication and routing
+            # v2.9.3 BUG FIX: Ensure funnel metrics use the same de-duplicated area calculation
             if not validation_ready.empty:
                 funnel_metrics["unique_contacts"] = len(validation_ready)
                 
@@ -1413,10 +1416,9 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                     funnel_metrics["direct_mail_contacts"] = len(direct_mail_df)
                     funnel_metrics["agency_contacts"] = len(agency_df)
                     
-                    if 'Area' in validation_ready.columns:
-                        validation_ready['Area'] = pd.to_numeric(validation_ready['Area'].astype(str).str.replace(',', '.'), errors='coerce').fillna(0)
-                        funnel_metrics["direct_mail_area_ha"] = direct_mail_df['Area'].sum()
-                        funnel_metrics["agency_area_ha"] = agency_df['Area'].sum()
+                    # Use de-duplicated parcel data for area calculation
+                    funnel_metrics["direct_mail_area_ha"] = direct_mail_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
+                    funnel_metrics["agency_area_ha"] = agency_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
             
         if self.pec_enabled and not companies_found.empty:
             print(f"   📧 Enhancing {len(companies_found)} company records with PEC emails...")
@@ -1433,27 +1435,28 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
             if not companies_found.empty: companies_found.to_excel(writer, sheet_name='Companies_Found', index=False)
             pd.DataFrame(list(summary_data.items()), columns=['Metric', 'Value']).to_excel(writer, sheet_name='Municipality_Summary', index=False)
             
-            # v2.9: Add funnel visualization sheet
+            # v2.9.4 FINAL FIX: Use the corrected summary metrics to build the funnel sheet for consistency
             if funnel_metrics:
+                summary_metrics = self.create_municipality_summary(municipality_key, municipality_data, df_raw, validation_ready, companies_found, funnel_metrics)
                 funnel_df = pd.DataFrame([
                     {"Stage": "1. Input", "Parcels": funnel_metrics["input_parcels"], 
                      "Hectares": funnel_metrics["input_area_ha"], "Description": "Initial parcels from input file"},
                     {"Stage": "2. After API", "Parcels": funnel_metrics["after_api_parcels"], 
                      "Hectares": funnel_metrics["after_api_area_ha"], "Description": "Parcels with owner data retrieved"},
-                    {"Stage": "3. Private Owners", "Parcels": funnel_metrics["private_owner_parcels"], 
-                     "Hectares": funnel_metrics["private_owner_area_ha"], "Description": "Individual owner parcels"},
-                    {"Stage": "4. Company Owners", "Parcels": funnel_metrics["company_owner_parcels"], 
-                     "Hectares": funnel_metrics["company_owner_area_ha"], "Description": "Company-owned parcels (bypass Cat.A)"},
-                    {"Stage": "5. After Cat.A Filter", "Parcels": funnel_metrics["after_cata_filter_parcels"], 
-                     "Hectares": funnel_metrics["after_cata_filter_area_ha"], "Description": "Residential properties only"},
+                    {"Stage": "3. Private Owners", "Parcels": summary_metrics["Private_Owner_Parcels"], 
+                     "Hectares": summary_metrics["Private_Owner_Area_Ha"], "Description": "Individual owner parcels"},
+                    {"Stage": "4. Company Owners", "Parcels": summary_metrics["Company_Owner_Parcels"], 
+                     "Hectares": summary_metrics["Company_Owner_Area_Ha"], "Description": "Company-owned parcels (bypass Cat.A)"},
+                    {"Stage": "5. After Cat.A Filter", "Parcels": summary_metrics["After_CatA_Filter_Parcels"], 
+                     "Hectares": summary_metrics["After_CatA_Filter_Area_Ha"], "Description": "Residential properties only"},
                     {"Stage": "6. Unique Contacts", "Parcels": "-", 
-                     "Hectares": "-", "Description": f"{funnel_metrics['unique_contacts']} deduplicated contacts"},
+                     "Hectares": "-", "Description": f'{summary_metrics["Unique_Owner_Address_Pairs"]} deduplicated contacts'},
                     {"Stage": "7. Direct Mail", "Parcels": "-", 
-                     "Hectares": funnel_metrics["direct_mail_area_ha"], 
-                     "Description": f"{funnel_metrics['direct_mail_contacts']} contacts via direct mail"},
+                     "Hectares": summary_metrics["Direct_Mail_Final_Area_Ha"], 
+                     "Description": f'{summary_metrics["Direct_Mail_Final_Contacts"]} contacts via direct mail'},
                     {"Stage": "8. Agency Required", "Parcels": "-", 
-                     "Hectares": funnel_metrics["agency_area_ha"], 
-                     "Description": f"{funnel_metrics['agency_contacts']} contacts via agency"},
+                     "Hectares": summary_metrics["Agency_Final_Area_Ha"], 
+                     "Description": f'{summary_metrics["Agency_Final_Contacts"]} contacts via agency'},
                 ])
                 funnel_df.to_excel(writer, sheet_name='Funnel_Analysis', index=False)
         

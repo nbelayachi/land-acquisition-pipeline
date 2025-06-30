@@ -1,0 +1,83 @@
+2025-06-27 12:37:54,540 - __main__ - INFO - Enhanced Land Acquisition Pipeline v2.9 initialized
+2025-06-27 12:37:54,552 - __main__ - INFO - Loaded 3 cached API responses
+2025-06-27 12:37:54,552 - __main__ - INFO - Geocoding enhancement enabled
+2025-06-27 12:37:54,564 - __main__ - INFO - Loaded 0 cached geocoding responses
+2025-06-27 12:37:54,565 - __main__ - INFO - PEC email integration enabled
+2025-06-27 12:37:54,567 - __main__ - INFO - Loaded 0 cached PEC responses
+2025-06-27 12:40:11,415 - __main__ - INFO - Geocoding address: CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI
+2025-06-27 12:40:11,689 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:40:11,689 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:40:11,690 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:40:11,690 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:40:11,690 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:40:11,690 - __main__ - INFO - Direct geocoding success: CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI -> 26841
+2025-06-27 12:40:13,693 - __main__ - INFO - Geocoding address: CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC
+2025-06-27 12:40:13,979 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:40:13,979 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:40:13,980 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:40:13,980 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:40:13,980 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:40:13,980 - __main__ - INFO - Direct geocoding success: CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC -> 26841
+2025-06-27 12:40:15,982 - __main__ - INFO - Geocoding address: TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC
+2025-06-27 12:40:16,297 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:40:16,297 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:40:16,298 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:40:16,298 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:40:16,299 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:40:16,299 - __main__ - INFO - Direct geocoding success: TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC -> 87064
+2025-06-27 12:45:10,764 - __main__ - INFO - Geocoding address: SALERANO SUL LAMBRO(LO) VICOLO CREMONA n. 34
+2025-06-27 12:45:11,164 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:45:11,164 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:45:11,166 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:45:11,166 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:45:11,166 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:45:11,166 - __main__ - INFO - Direct geocoding success: SALERANO SUL LAMBRO(LO) VICOLO CREMONA n. 34 -> 26857
+2025-06-27 12:45:13,168 - __main__ - INFO - Geocoding address: BORGHETTO LODIGIANO(LO) CASCINA S. ANTONIO n. SNC
+2025-06-27 12:45:13,474 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:45:13,475 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:45:13,475 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:45:13,475 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:45:13,475 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:45:13,476 - __main__ - INFO - Direct geocoding success: BORGHETTO LODIGIANO(LO) CASCINA S. ANTONIO n. SNC -> 26812
+2025-06-27 12:45:15,478 - __main__ - INFO - Geocoding address: CASALPUSTERLENGO(LO) CASCINA CROCI n. SNC
+2025-06-27 12:45:15,808 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:45:15,808 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:45:15,808 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:45:15,809 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:45:15,809 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:45:15,809 - __main__ - INFO - Direct geocoding success: CASALPUSTERLENGO(LO) CASCINA CROCI n. SNC -> 26841
+2025-06-27 12:45:17,810 - __main__ - INFO - Geocoding address: OSPEDALETTO LODIGIANO(LO) CASCINA VILLAFRANCA DI MEZZO n. 1
+2025-06-27 12:45:18,069 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:45:18,070 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 12:45:18,070 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:45:18,070 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:45:18,070 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:45:18,071 - __main__ - INFO - Direct geocoding success: OSPEDALETTO LODIGIANO(LO) CASCINA VILLAFRANCA DI MEZZO n. 1 -> 26864
+2025-06-27 12:53:10,046 - __main__ - INFO - Geocoding address: CARPENEDOLO(BS) LOCALITA' LIVELLI n. 3
+2025-06-27 12:53:10,631 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 12:53:10,694 - __main__ - INFO - Geocoding API response structure: ['element', 'sourced', 'success', 'message', 'error']
+2025-06-27 12:53:10,696 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 12:53:10,696 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 12:53:10,696 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 12:53:10,697 - __main__ - INFO - Direct geocoding success: CARPENEDOLO(BS) LOCALITA' LIVELLI n. 3 -> 25013
+2025-06-27 13:00:11,052 - __main__ - INFO - Geocoding address: MONTICHIARI(BS) VIA MANTOVA
+2025-06-27 13:00:11,392 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 13:00:11,393 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 13:00:11,398 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 13:00:11,398 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 13:00:11,400 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 13:00:11,401 - __main__ - INFO - Direct geocoding success: MONTICHIARI(BS) VIA MANTOVA -> 25018
+2025-06-27 13:00:13,404 - __main__ - INFO - Geocoding address: MONTICHIARI(BS) VIA CHIARINI SECONDO n. 118
+2025-06-27 13:00:13,673 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 13:00:13,679 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 13:00:13,684 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 13:00:13,684 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 13:00:13,684 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 13:00:13,685 - __main__ - INFO - Direct geocoding success: MONTICHIARI(BS) VIA CHIARINI SECONDO n. 118 -> 25018
+2025-06-27 13:00:15,687 - __main__ - INFO - Geocoding address: MONTICHIARI(BS) VIA MANTOVA n. 313/B
+2025-06-27 13:00:15,965 - __main__ - INFO - Geocoding API response status: 200
+2025-06-27 13:00:15,965 - __main__ - INFO - Geocoding API response structure: ['element', 'success', 'message', 'error']
+2025-06-27 13:00:15,967 - __main__ - INFO - Extracting geocoding data from element: ['providedBy', 'latitude', 'longitude', 'bounds', 'streetNumber', 'streetName', 'postalCode', 'locality', 'subLocality', 'adminLevels', 'country', 'countryCode', 'timezone', 'id']
+2025-06-27 13:00:15,968 - __main__ - INFO - Successfully extracted 15 geocoding fields
+2025-06-27 13:00:15,968 - __main__ - INFO - Successfully extracted geocoding data with 15 fields
+2025-06-27 13:00:15,968 - __main__ - INFO - Direct geocoding success: MONTICHIARI(BS) VIA MANTOVA n. 313/B -> 25018

@@ -1,0 +1,28 @@
+2025-06-30 12:19:51,613 - __main__ - INFO - Enhanced Land Acquisition Pipeline v2.9 initialized
+2025-06-30 12:19:51,623 - __main__ - INFO - Loaded 23 cached API responses
+2025-06-30 12:19:51,623 - __main__ - INFO - Geocoding enhancement enabled
+2025-06-30 12:19:51,629 - __main__ - INFO - Loaded 11 cached geocoding responses
+2025-06-30 12:19:51,629 - __main__ - INFO - PEC email integration enabled
+2025-06-30 12:19:51,643 - __main__ - INFO - Loaded 0 cached PEC responses
+2025-06-30 12:19:56,018 - __main__ - INFO - Geocoding address: CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI
+2025-06-30 12:19:56,028 - __main__ - INFO - Using cached ZIP code for: CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI
+2025-06-30 12:19:58,029 - __main__ - INFO - Geocoding address: CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC
+2025-06-30 12:19:58,029 - __main__ - INFO - Using cached ZIP code for: CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC
+2025-06-30 12:20:00,031 - __main__ - INFO - Geocoding address: TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC
+2025-06-30 12:20:00,031 - __main__ - INFO - Using cached ZIP code for: TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC
+2025-06-30 12:20:08,319 - __main__ - INFO - Geocoding address: SALERANO SUL LAMBRO(LO) VICOLO CREMONA n. 34
+2025-06-30 12:20:08,319 - __main__ - INFO - Using cached ZIP code for: SALERANO SUL LAMBRO(LO) VICOLO CREMONA n. 34
+2025-06-30 12:20:10,323 - __main__ - INFO - Geocoding address: BORGHETTO LODIGIANO(LO) CASCINA S. ANTONIO n. SNC
+2025-06-30 12:20:10,323 - __main__ - INFO - Using cached ZIP code for: BORGHETTO LODIGIANO(LO) CASCINA S. ANTONIO n. SNC
+2025-06-30 12:20:12,324 - __main__ - INFO - Geocoding address: CASALPUSTERLENGO(LO) CASCINA CROCI n. SNC
+2025-06-30 12:20:12,328 - __main__ - INFO - Using cached ZIP code for: CASALPUSTERLENGO(LO) CASCINA CROCI n. SNC
+2025-06-30 12:20:14,330 - __main__ - INFO - Geocoding address: OSPEDALETTO LODIGIANO(LO) CASCINA VILLAFRANCA DI MEZZO n. 1
+2025-06-30 12:20:14,330 - __main__ - INFO - Using cached ZIP code for: OSPEDALETTO LODIGIANO(LO) CASCINA VILLAFRANCA DI MEZZO n. 1
+2025-06-30 12:20:20,630 - __main__ - INFO - Geocoding address: CARPENEDOLO(BS) LOCALITA' LIVELLI n. 3
+2025-06-30 12:20:20,630 - __main__ - INFO - Using cached ZIP code for: CARPENEDOLO(BS) LOCALITA' LIVELLI n. 3
+2025-06-30 12:20:29,152 - __main__ - INFO - Geocoding address: MONTICHIARI(BS) VIA MANTOVA
+2025-06-30 12:20:29,152 - __main__ - INFO - Using cached ZIP code for: MONTICHIARI(BS) VIA MANTOVA
+2025-06-30 12:20:31,158 - __main__ - INFO - Geocoding address: MONTICHIARI(BS) VIA CHIARINI SECONDO n. 118
+2025-06-30 12:20:31,158 - __main__ - INFO - Using cached ZIP code for: MONTICHIARI(BS) VIA CHIARINI SECONDO n. 118
+2025-06-30 12:20:33,162 - __main__ - INFO - Geocoding address: MONTICHIARI(BS) VIA MANTOVA n. 313/B
+2025-06-30 12:20:33,164 - __main__ - INFO - Using cached ZIP code for: MONTICHIARI(BS) VIA MANTOVA n. 313/B
