@@ -1,4 +1,4 @@
-# 🔧 Technical Guide - Land Acquisition Pipeline v2.9.6
+# 🔧 Technical Guide - Land Acquisition Pipeline v2.9.7
 
 ## 📊 **Architecture Overview**
 
@@ -25,10 +25,10 @@ Property Data → API Calls → Owner Enhancement → Single Excel File
 - **Input**: Excel file path, campaign name
 - **Output**: Single `[Campaign_Name]_Results.xlsx`
 
-#### `create_consolidated_excel_output()` (Line ~1445) 
-- **Purpose**: Creates single Excel with all 5 sheets
-- **Recent Fix**: Ensures All_Companies_Found always created
-- **Sheets**: Raw Data, Validation Ready, Companies, Summary, Funnel
+#### `create_consolidated_excel_output()` (Line ~1589) 
+- **Purpose**: Creates single Excel with all 7 sheets
+- **v2.9.7 Enhancement**: Added parcel ownership analysis sheets
+- **Sheets**: Raw Data, Validation Ready, Companies, Summary, Funnel, Owners_By_Parcel, Owners_Normalized
 
 #### `create_municipality_summary()` (Line ~819)
 - **Purpose**: Generate business metrics per municipality
@@ -39,6 +39,12 @@ Property Data → API Calls → Owner Enhancement → Single Excel File
 - **Purpose**: Track parcels/hectares through processing stages
 - **v2.9.6 Fix**: Added provincia column for complete traceability
 - **Output**: 8 stages from input to final routing
+
+#### `create_owners_by_parcel_sheets()` (Line ~1445) **🆕 v2.9.7**
+- **Purpose**: Group all owners by input parcel for complete ownership analysis
+- **Key Feature**: Groups by (comune, foglio_input, particella_input) regardless of classamento
+- **Output**: Two DataFrames - wide format (user-friendly) and normalized (Power BI ready)
+- **Business Value**: Complete ownership database for land acquisition negotiations
 
 ### **Critical Fixes Applied (v2.9.6)**
 
@@ -100,15 +106,19 @@ summary_dict = {
 ├── All_Validation_Ready (23 rows typical)  
 ├── All_Companies_Found (0-N rows)
 ├── Campaign_Summary (5 rows = municipalities)
-└── Funnel_Analysis (40 rows = 8 stages × 5 municipalities)
+├── Funnel_Analysis (40 rows = 8 stages × 5 municipalities)
+├── 🆕 Owners_By_Parcel (10 rows = unique parcels with up to 10 owners each)
+└── 🆕 Owners_Normalized (128 rows = one row per owner-parcel relationship)
 ```
 
 ### **Key Validation Points**
-- All 5 sheets present
+- All 7 sheets present (including new ownership analysis sheets)
 - Campaign_Summary has CP/comune/provincia columns
 - Area values realistic (10-50 Ha typical, not 100,000+)
 - Unique_Owner_Address_Pairs > 0
 - Funnel_Analysis has provincia column
+- **🆕 Owners_By_Parcel**: Shows complete ownership per input parcel
+- **🆕 Owners_Normalized**: One row per owner-parcel relationship (Power BI ready)
 
 ## ⚙️ **Configuration**
 

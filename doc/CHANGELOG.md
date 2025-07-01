@@ -1,5 +1,34 @@
 # 📋 Changelog - Land Acquisition Pipeline
 
+## [2.9.7] - 2025-07-01 🆕 PARCEL OWNERSHIP FEATURE
+
+### ✨ **New Features**
+- **Complete Parcel Ownership Analysis**: Groups all owners by input parcel (comune + foglio_input + particella_input)
+- **Owners_By_Parcel Sheet**: User-friendly wide format showing up to 10 owners per parcel
+- **Owners_Normalized Sheet**: Power BI ready format with one row per owner-parcel relationship
+- **Quota Preservation**: Maintains ownership fractions/percentages from original data
+- **Cross-Classamento Analysis**: Shows ALL owners regardless of property type (Cat.A, Cat.C, etc.)
+
+### 🔧 **Technical Implementation**
+- Added `create_owners_by_parcel_sheets()` function (line 1445)
+- Modified `create_consolidated_excel_output()` to include new sheets
+- Enhanced output from 5 to 7 Excel sheets
+- Robust owner deduplication and grouping logic
+- Sorting by municipality and owner count for easy analysis
+
+### 📊 **Business Value**
+- **Complete Ownership Database**: Know all stakeholders before negotiations
+- **Co-ownership Analysis**: Identify complex ownership situations  
+- **Power BI Integration**: Ready for advanced analytics and visualizations
+- **Strategic Planning**: Prioritize parcels by ownership complexity
+
+### 🎯 **User Request Fulfilled**
+> "Group the owners data by parcel to have a complete dataset of the different owners per parcel, regardless of the classamento. The objective is to have all the landowners of the parcel."
+
+**Status**: ✅ **IMPLEMENTED** - Ready for production use
+
+---
+
 ## [2.9.6] - 2025-07-01 ✅ STABLE
 
 ### 🔧 Fixed (Critical Issues Resolved)

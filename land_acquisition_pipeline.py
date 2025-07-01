@@ -3,7 +3,7 @@
 Enhanced Land Acquisition Pipeline with Geocoding Integration and Funnel Metrics
 Handles complete workflow from single input file to municipality-structured outputs
 ENHANCED: Automatic geocoding, PEC email retrieval, and comprehensive funnel tracking
-VERSION: 2.9 (with SNC reclassification and funnel metrics)
+VERSION: 2.9.7 (with parcel ownership grouping analysis)
 
 @author: Optimized for CP-Municipality land acquisition workflow with address enhancement
 """
@@ -1442,6 +1442,150 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         ])
         return funnel_df
 
+    def create_owners_by_parcel_sheets(self, df_all_raw):
+        """
+        Create two sheets for parcel ownership analysis:
+        1. Owners_By_Parcel: Wide format (user-friendly)
+        2. Owners_Normalized: Normalized format (Power BI ready)
+        
+        Groups owners by (comune, foglio_input, particella_input) regardless of classamento
+        """
+        if df_all_raw.empty:
+            self.logger.warning("No raw data available for parcel ownership analysis")
+            return pd.DataFrame(), pd.DataFrame()
+        
+        print(f"   🏠 Creating parcel ownership analysis...")
+        
+        # Group by parcel (comune + foglio_input + particella_input)
+        parcel_groups = df_all_raw.groupby(['comune', 'foglio_input', 'particella_input'])
+        
+        # Wide format data (user-friendly)
+        wide_format_data = []
+        # Normalized format data (Power BI ready)
+        normalized_data = []
+        
+        for (comune, foglio, particella), group in parcel_groups:
+            # Get parcel info
+            cp = group['CP'].iloc[0] if 'CP' in group.columns else ''
+            area = group['Area'].iloc[0] if 'Area' in group.columns else ''
+            
+            # Process area (handle comma decimal format)
+            try:
+                if pd.notna(area) and area != '':
+                    parcel_area_ha = float(str(area).replace(',', '.'))
+                else:
+                    parcel_area_ha = 0.0
+            except (ValueError, TypeError):
+                parcel_area_ha = 0.0
+            
+            # Get unique owners with their quotas
+            unique_owners = []
+            seen_owners = set()
+            
+            for _, row in group.iterrows():
+                # Create owner identifier
+                cf = row.get('cf', '')
+                denominazione = row.get('denominazione', '')
+                nome = row.get('nome', '')
+                cognome = row.get('cognome', '')
+                quota = row.get('quota', 'missing')
+                
+                # Create owner name (prefer nome+cognome for individuals, denominazione for companies)
+                if nome and cognome:
+                    owner_name = f"{cognome} {nome}".strip()
+                elif denominazione:
+                    owner_name = str(denominazione).strip()
+                else:
+                    owner_name = "N/A"
+                
+                # Create unique identifier
+                owner_key = f"{cf}_{owner_name}"
+                
+                if owner_key not in seen_owners and cf and cf != 'N/A':
+                    seen_owners.add(owner_key)
+                    
+                    # Determine owner type
+                    owner_type = self.classify_owner_type(cf) if hasattr(self, 'classify_owner_type') else 'Unknown'
+                    
+                    # Handle quota
+                    if pd.isna(quota) or quota == '' or quota == 'N/A':
+                        quota = 'missing'
+                    
+                    unique_owners.append({
+                        'name': owner_name,
+                        'cf': cf,
+                        'quota': str(quota),
+                        'type': owner_type
+                    })
+            
+            # Sort owners by name for consistency
+            unique_owners.sort(key=lambda x: x['name'])
+            total_owners = len(unique_owners)
+            
+            # Create wide format row (up to 10 owners)
+            wide_row = {
+                'comune': comune,
+                'CP': cp,
+                'foglio_input': foglio,
+                'particella_input': particella,
+                'parcel_area_ha': parcel_area_ha,
+                'total_owners': total_owners
+            }
+            
+            # Add up to 10 owners in wide format
+            for i in range(10):
+                if i < len(unique_owners):
+                    owner = unique_owners[i]
+                    wide_row[f'owner_{i+1}_name'] = owner['name']
+                    wide_row[f'owner_{i+1}_cf'] = owner['cf']
+                    wide_row[f'owner_{i+1}_quota'] = owner['quota']
+                else:
+                    wide_row[f'owner_{i+1}_name'] = ''
+                    wide_row[f'owner_{i+1}_cf'] = ''
+                    wide_row[f'owner_{i+1}_quota'] = ''
+            
+            # Handle excess owners
+            if total_owners > 10:
+                additional_count = total_owners - 10
+                wide_row['additional_owners'] = f"...and {additional_count} more owners"
+                wide_row['ownership_summary'] = f"10 shown + {additional_count} more = {total_owners} total"
+            else:
+                wide_row['additional_owners'] = ''
+                wide_row['ownership_summary'] = f"All {total_owners} owners shown"
+            
+            wide_format_data.append(wide_row)
+            
+            # Create normalized format rows (one row per owner)
+            for owner in unique_owners:
+                normalized_row = {
+                    'comune': comune,
+                    'CP': cp,
+                    'foglio_input': foglio,
+                    'particella_input': particella,
+                    'parcel_area_ha': parcel_area_ha,
+                    'owner_name': owner['name'],
+                    'owner_cf': owner['cf'],
+                    'quota': owner['quota'],
+                    'owner_type': owner['type']
+                }
+                normalized_data.append(normalized_row)
+        
+        # Create DataFrames
+        df_wide = pd.DataFrame(wide_format_data)
+        df_normalized = pd.DataFrame(normalized_data)
+        
+        # Sort by municipality, then by total owners (descending)
+        if not df_wide.empty:
+            df_wide = df_wide.sort_values(['comune', 'total_owners', 'foglio_input', 'particella_input'], 
+                                        ascending=[True, False, True, True])
+        
+        if not df_normalized.empty:
+            df_normalized = df_normalized.sort_values(['comune', 'foglio_input', 'particella_input', 'owner_name'])
+        
+        print(f"   📊 Parcel ownership analysis complete: {len(df_wide)} parcels, {len(df_normalized)} owner-parcel relationships")
+        
+        return df_wide, df_normalized
+
     def create_consolidated_excel_output(self, campaign_name, all_raw_data, all_validation_ready, all_companies_found, all_summaries, all_funnels):
         """v2.9.5: Creates a single, consolidated Excel file with all campaign results."""
         campaign_dir = os.path.join(self.config.get("output_structure", {}).get("completed_campaigns_dir", "completed_campaigns"), campaign_name)
@@ -1456,6 +1600,9 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         df_all_companies = pd.concat(all_companies_found, ignore_index=True) if all_companies_found else pd.DataFrame()
         df_campaign_summary = pd.DataFrame(all_summaries) if all_summaries else pd.DataFrame()
         df_all_funnels = pd.concat(all_funnels, ignore_index=True) if all_funnels else pd.DataFrame()
+
+        # Create parcel ownership analysis sheets
+        df_owners_wide, df_owners_normalized = self.create_owners_by_parcel_sheets(df_all_raw)
 
         with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
             if not df_all_validation_ready.empty:
@@ -1475,8 +1622,18 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                 df_all_funnels.to_excel(writer, sheet_name='Funnel_Analysis', index=False)
             if not df_all_raw.empty:
                 df_all_raw.to_excel(writer, sheet_name='All_Raw_Data', index=False)
+            
+            # Add new parcel ownership analysis sheets
+            if not df_owners_wide.empty:
+                df_owners_wide.to_excel(writer, sheet_name='Owners_By_Parcel', index=False)
+                print(f"   🏠 Owners_By_Parcel: {len(df_owners_wide)} parcels analyzed")
+            
+            if not df_owners_normalized.empty:
+                df_owners_normalized.to_excel(writer, sheet_name='Owners_Normalized', index=False)
+                print(f"   📊 Owners_Normalized: {len(df_owners_normalized)} owner-parcel relationships")
         
         print(f"   ✅ Consolidated output saved: {os.path.basename(output_file)}")
+        print(f"   📋 Total sheets: 7 (including new parcel ownership analysis)")
 
 
 if __name__ == "__main__":

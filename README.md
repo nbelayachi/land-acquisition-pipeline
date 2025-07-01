@@ -1,8 +1,8 @@
-# 🏠 Land Acquisition Pipeline v2.9.6
+# 🏠 Land Acquisition Pipeline v2.9.7
 
-**Status**: ✅ **PRODUCTION READY** - All critical issues resolved  
+**Status**: ✅ **PRODUCTION READY** - Enhanced with parcel ownership analysis  
 **Last Updated**: July 1, 2025  
-**Version**: 2.9.6 (Stable)
+**Version**: 2.9.7 (Stable + Parcel Ownership Feature)
 
 ## 📋 **What This Does**
 
@@ -26,15 +26,17 @@ python campaign_launcher.py
 # Follow prompts to launch campaign
 ```
 
-### Output Structure (v2.9.6)
-Single file: `[Campaign_Name]_Results.xlsx` with 5 sheets:
+### Output Structure (v2.9.7)
+Single file: `[Campaign_Name]_Results.xlsx` with 7 sheets:
 - **All_Raw_Data**: Complete raw property owner data
 - **All_Validation_Ready**: Processed contacts ready for outreach  
 - **All_Companies_Found**: Company owners with PEC emails
 - **Campaign_Summary**: Business metrics by municipality
 - **Funnel_Analysis**: Parcel/hectare flow tracking
+- **🆕 Owners_By_Parcel**: Complete ownership per parcel (user-friendly)
+- **🆕 Owners_Normalized**: Power BI ready ownership data
 
-## 📊 **Current Status (v2.9.6)**
+## 📊 **Current Status (v2.9.7)**
 
 ### ✅ **Working Features**
 - **Single Consolidated Output**: One Excel file per campaign
@@ -44,8 +46,16 @@ Single file: `[Campaign_Name]_Results.xlsx` with 5 sheets:
 - **Geocoding Enhancement**: ZIP codes and coordinates
 - **Proper Decimal Formatting**: Accurate area calculations
 - **Complete Traceability**: CP/comune/provincia columns in all sheets
+- **🆕 Parcel Ownership Analysis**: Complete owner database per parcel
 
-### 🔧 **Recent Fixes (v2.9.6)**
+### 🆕 **New in v2.9.7**
+- **Owners_By_Parcel Sheet**: User-friendly view with up to 10 owners per parcel
+- **Owners_Normalized Sheet**: Power BI ready format for advanced analytics
+- **Complete Ownership Database**: All owners per parcel regardless of classamento
+- **Quota Tracking**: Ownership percentages/fractions preserved
+- **Power BI Integration Ready**: Normalized data structure for future dashboards
+
+### 🔧 **Previous Fixes (v2.9.6)**
 - Fixed decimal/comma confusion in area calculations
 - Added missing traceability columns to Campaign_Summary
 - Fixed Unique_Owner_Address_Pairs metric (was showing 0)
