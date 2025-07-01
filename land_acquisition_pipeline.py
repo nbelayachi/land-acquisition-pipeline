@@ -1878,10 +1878,62 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
 
         # Create parcel ownership analysis sheets
         df_owners_wide, df_owners_normalized = self.create_owners_by_parcel_sheets(df_all_raw)
+        # --- Create the Strategic Mailing List DataFrame ---
+        df_strategic_mailing = pd.DataFrame()
+        if not df_all_validation_ready.empty and not df_all_raw.empty:
+            
+            # 1. Get all unique, high-confidence mailing addresses for each owner
+            high_confidence_contacts = df_all_validation_ready[
+                df_all_validation_ready['Address_Confidence'].isin(['ULTRA_HIGH', 'HIGH'])
+            ]
+            owner_to_addresses = high_confidence_contacts.groupby('cf')['Best_Address'].unique().apply(list).to_dict()
 
+            # 2. Prepare the raw data, keeping only owners with at least one good address
+            owners_with_good_address = df_all_raw[df_all_raw['cf'].isin(owner_to_addresses.keys())].copy()
+            owners_with_good_address['Full_Name'] = np.where(
+                owners_with_good_address['nome'].notna() & (owners_with_good_address['nome'] != ''),
+                owners_with_good_address['cognome'] + ' ' + owners_with_good_address['nome'],
+                owners_with_good_address['denominazione']
+            )
+
+            # 3. Group by owner within each municipality to aggregate their parcels
+            grouped_by_owner = owners_with_good_address.groupby(['comune_input', 'provincia', 'cf', 'Full_Name'])
+
+            output_rows = []
+            for (comune, provincia, cf, full_name), group in grouped_by_owner:
+                # Get all parcels for this owner in this municipality
+                fogli = "; ".join(group['foglio_input'].astype(str).unique())
+                particelle = "; ".join(group['particella_input'].astype(str).unique())
+                
+                # Combine fogli and particelle for the 'Parcels' column
+                parcels_str_list = []
+                for f_str, p_str in zip(group['foglio_input'].astype(str), group['particella_input'].astype(str)):
+                    parcels_str_list.append(f"{f_str}-{p_str}")
+                parcels_display = "; ".join(sorted(list(set(parcels_str_list))))
+
+
+                # Get all the valid mailing addresses for this owner
+                mailing_addresses = owner_to_addresses.get(cf, [])
+                
+                # Create a row for each unique address
+                for address in mailing_addresses:
+                    output_rows.append({
+                        'Municipality': f"{comune} ({provincia})",
+                        'Foglio': fogli,
+                        'Particella': particelle,
+                        'Parcels': parcels_display,
+                        'Full_Name': full_name,
+                        'Mailing_Address': address
+                    })
+            
+            if output_rows:
+                df_strategic_mailing = pd.DataFrame(output_rows)
         with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
             if not df_all_validation_ready.empty:
                 df_all_validation_ready.to_excel(writer, sheet_name='All_Validation_Ready', index=False)
+                # Add the new strategic mailing list sheet
+            if not df_strategic_mailing.empty:
+                df_strategic_mailing.to_excel(writer, sheet_name='Final_Mailing_List', index=False)
             # Always create All_Companies_Found sheet (even if empty)
             if not df_all_companies.empty:
                 df_all_companies.to_excel(writer, sheet_name='All_Companies_Found', index=False)

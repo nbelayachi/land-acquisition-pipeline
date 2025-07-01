@@ -1,4 +1,30 @@
-# 🔧 Technical Guide - Land Acquisition Pipeline v2.9.7
+# Technical Guide - Land Acquisition Pipeline v3.0.0
+
+This document provides a technical overview of the `land_acquisition_pipeline.py` script.
+
+## Core Functions
+
+### `create_consolidated_excel_output()`
+This is the final function in the pipeline, responsible for generating the consolidated multi-sheet Excel report.
+
+A key feature of this function is the generation of the **`Strategic_Mailing_List`**. This is created through a complex data aggregation process:
+1.  It first identifies all high-confidence mailing addresses for owners from the `df_all_validation_ready` DataFrame.
+2.  It creates a lookup map linking each owner's `cf` to their list of valid addresses.
+3.  It then groups the `df_all_raw` data by owner (`cf`) within each municipality to aggregate all parcels belonging to that owner.
+4.  Finally, it iterates through these groups, creating a row for each valid mailing address for each owner, and populates the row with the aggregated parcel information (`Foglio`, `Particella`, etc.). This produces the strategic, grouped output required for the campaign.
+
+### `classify_address_quality_enhanced()`
+This function assesses the quality of a mailing address by comparing the original data with the results from the geocoding API. It analyzes street number similarity and the completeness of the geocoded data to assign a confidence score (`ULTRA_HIGH`, `HIGH`, `MEDIUM`, `LOW`) and a recommended `Routing_Channel` (`DIRECT_MAIL` or `AGENCY`).
+
+### `extract_street_number_enhanced()`
+This helper function uses regular expressions to extract a street number from an address string. The patterns have been refined to be more conservative, now prioritizing numbers at the very end of a string or those explicitly marked with "n.". This prevents the logic from incorrectly extracting numbers that are part of a street's proper name (e.g., the "4" in "Via 4 Novembre").
+
+## Output File Structure
+The script generates a single `.xlsx` file containing several sheets:
+- **`Strategic_Mailing_List`**: Grouped by input parcel, this sheet lists all owners and all their high-confidence addresses. Columns: `Municipality`, `Foglio`, `Particella`, `Parcels`, `Full_Name`, `Mailing_Address`.
+- **`All_Validation_Ready`**: Contains all individual owners of residential properties with detailed address analysis.
+- **`All_Companies_Found`**: Lists all company owners with their retrieved PEC emails.
+- **(other sheets remain as previously documented)**
 
 ## 📊 **Architecture Overview**
 

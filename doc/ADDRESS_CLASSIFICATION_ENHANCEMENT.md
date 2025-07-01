@@ -1,5 +1,65 @@
 # 🎯 Address Classification Enhancement - Technical Documentation
 
+
+
+
+# Address Classification Enhancement - v3.0.0
+
+## 1. Business Problem
+The primary bottleneck in the land acquisition process was the time-consuming manual verification of owner addresses. Returned mail resulted in wasted costs and delayed campaigns. The goal was to create an automated system to classify the quality of mailing addresses to enable a "ready-to-mail" list for the most reliable contacts.
+
+## 2. The Solution: Automated Confidence Scoring
+The pipeline now integrates with a geocoding API to verify and enhance owner addresses. It then applies a sophisticated classification model (`classify_address_quality_enhanced`) to assign a confidence score.
+
+### Confidence Tiers
+- **ULTRA_HIGH**: Perfect match between original and geocoded data with high completeness. These can be sent to the mailing company with no review.
+- **HIGH**: Strong match with minor variations. These are also considered ready for direct mail.
+- **MEDIUM**: Some discrepancies found (e.g., mismatched street numbers). Routed for direct mail but may warrant a quick review.
+- **LOW**: Significant issues, such as no street number. These are routed to an agency for manual trace.
+
+### Continuous Improvement
+The system's logic is continuously refined to handle real-world edge cases. For instance, the number extraction logic was improved to correctly parse Italian addresses where numbers are part of the street's proper name (e.g., "Via 4 Novembre"). This refinement increases the accuracy of the confidence score, ensuring valid addresses are not incorrectly downgraded.
+
+## 3. Business Impact
+- **Reduced Manual Work**: Drastically cuts down on the hours required for manual address verification.
+- **Cost Savings**: Minimizes the cost of returned mail.
+- **Faster Campaigns**: Enables the land acquisition team to launch campaigns more quickly with a high-quality, pre-vetted contact list.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## **Overview**
 
 This document describes the enhanced address classification system designed to improve campaign efficiency by creating more reliable confidence levels and enabling immediate printing of high-quality addresses.

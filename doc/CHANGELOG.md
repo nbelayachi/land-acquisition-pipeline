@@ -1,5 +1,27 @@
 # 📋 Changelog - Land Acquisition Pipeline
 
+# Changelog
+
+## [3.0.0] - 2025-07-01 🚀 NEW MAILING FORMAT & ENHANCED PARSING
+
+### ✨ **Features**
+- **Added Strategic Mailing List**: Implemented a new primary output sheet named `Strategic_Mailing_List`. This sheet provides a comprehensive overview grouped by the initial input parcels. For each parcel group, it lists all unique owners and all of their known high-confidence mailing addresses, enabling complex campaign strategies.
+
+### 🔧 **Fixes**
+- **Refined Street Number Extraction**: Modified the address parsing logic to be more conservative. The script no longer incorrectly extracts numbers that are part of a proper street name (e.g., "Via 4 Novembre"). This increases the accuracy of address classification and prevents valid addresses from being downgraded.
+
+---
+## [2.9.8] - 2025-06-28 🎯 ENHANCED ADDRESS CLASSIFICATION
+
+### ✨ **Features**
+- **ULTRA_HIGH Confidence Level**: Added a new top-tier address confidence level for addresses that are a perfect match and have highly complete data.
+- **Enhanced Number Comparison**: The system now analyzes the base number and suffixes separately (e.g., "32" and "32/A") and can identify adjacent or close numbers, improving match quality.
+- **Address Completeness Score**: Each address is now scored based on the presence of critical fields (`Street_Name`, `Postal_Code`, `City`), which feeds into the final confidence assessment.
+
+### ⚙️ **Internal**
+- **Configurable Thresholds**: All confidence and completeness thresholds are now configurable in the `land_acquisition_config.json` file.
+- **Refactored `classify_address_quality`**: The function was split into `classify_address_quality_enhanced` and a legacy original version for better maintainability.
+
 ## [2.9.9] - 2025-07-01 🔧 FIXED ADDRESS PARSING
 
 ### 🔧 **Fixes**
