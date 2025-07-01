@@ -132,6 +132,12 @@ class IntegratedLandAcquisitionPipeline:
                 "enabled": False,
                 "token": "YOUR_PEC_API_TOKEN"
             },
+            "enhanced_classification": {
+                "enabled": False,
+                "ultra_high_completeness_threshold": 0.75,
+                "high_completeness_threshold": 0.5,
+                "enable_ultra_high_confidence": True
+            },
             "cost_tracking": {
                 "method": "manual_balance_check",
                 "prompt_for_start_balance": True,
@@ -643,11 +649,278 @@ class IntegratedLandAcquisitionPipeline:
             return original_province_code == geocoded_province_code.upper()
         return False
 
+    def extract_street_number_enhanced(self, address):
+        """
+        Enhanced number extraction that correctly handles Italian geocoded addresses
+        Fixes the issue where postal codes were extracted instead of street numbers
+        """
+        if not isinstance(address, str):
+            return None
+            
+        # For Italian geocoded addresses in format: "Street Name, Number, PostalCode City Province"
+        # Extract the number that comes AFTER the first comma but BEFORE the postal code
+        
+        # Try geocoded format first: "Street Name, Number, PostalCode..."
+        geocoded_pattern = r',\s*(\d+[A-Za-z/]{0,3})\s*,'
+        match = re.search(geocoded_pattern, address)
+        if match:
+            return match.group(1).upper().strip()
+        
+        # Original patterns for raw addresses
+        patterns = [
+            r'n\.?\s*(\d+[A-Za-z/]{0,3})(?!\d)',  # "n. 34" - avoid longer numbers
+            r'\b(\d+[A-Za-z/]{0,3})(?:\s+[A-Z]|\s*$)',  # Number followed by letters or end
+            r'^.*?(\d+[A-Za-z/]{0,3})(?:\s+\w+)*\s*$'   # Last resort
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, address, re.IGNORECASE)
+            if match:
+                number = match.group(1).upper().strip()
+                # Avoid postal codes (usually 5 digits)
+                if len(re.sub(r'[A-Z/]', '', number)) < 5:
+                    return number
+        
+        return None
+    
+    def normalize_number_for_comparison(self, number_str):
+        """Normalize number for enhanced comparison"""
+        if not number_str:
+            return None
+            
+        num_str = str(number_str).upper().strip()
+        base_match = re.match(r'(\d+)', num_str)
+        if base_match:
+            base_number = base_match.group(1)
+            suffix_match = re.search(r'(\d+)([A-Z/]+)', num_str)
+            suffix = suffix_match.group(2) if suffix_match else ''
+            
+            return {
+                'full': num_str,
+                'base': base_number,
+                'suffix': suffix
+            }
+        return None
+    
+    def calculate_number_similarity(self, original_num, geocoded_num):
+        """Calculate similarity between original and geocoded numbers"""
+        if not original_num or not geocoded_num:
+            return {'similarity': 0.0, 'match_type': 'no_match', 'confidence': 'LOW', 'reason': 'Missing numbers'}
+        
+        orig_norm = self.normalize_number_for_comparison(original_num)
+        geo_norm = self.normalize_number_for_comparison(geocoded_num)
+        
+        if not orig_norm or not geo_norm:
+            return {'similarity': 0.0, 'match_type': 'no_match', 'confidence': 'LOW', 'reason': 'Invalid numbers'}
+        
+        # Exact match (including suffixes)
+        if orig_norm['full'] == geo_norm['full']:
+            return {
+                'similarity': 1.0, 
+                'match_type': 'exact_match', 
+                'confidence': 'ULTRA_HIGH',
+                'reason': f"Perfect match: {orig_norm['full']}"
+            }
+        
+        # Base number match (ignoring suffixes)
+        if orig_norm['base'] == geo_norm['base']:
+            return {
+                'similarity': 0.9, 
+                'match_type': 'base_match', 
+                'confidence': 'HIGH',
+                'reason': f"Base number match: {orig_norm['base']} (suffixes: '{orig_norm['suffix']}' vs '{geo_norm['suffix']}')"
+            }
+        
+        # Close numbers
+        try:
+            orig_int = int(orig_norm['base'])
+            geo_int = int(geo_norm['base'])
+            diff = abs(orig_int - geo_int)
+            
+            if diff == 1:
+                return {
+                    'similarity': 0.7, 
+                    'match_type': 'adjacent_number', 
+                    'confidence': 'MEDIUM',
+                    'reason': f"Adjacent numbers: {orig_int} vs {geo_int}"
+                }
+            elif diff == 2:
+                return {
+                    'similarity': 0.6, 
+                    'match_type': 'close_number', 
+                    'confidence': 'MEDIUM',
+                    'reason': f"Close numbers: {orig_int} vs {geo_int}"
+                }
+            else:
+                return {
+                    'similarity': 0.1, 
+                    'match_type': 'different_number', 
+                    'confidence': 'LOW',
+                    'reason': f"Different numbers: {orig_int} vs {geo_int}"
+                }
+                
+        except ValueError:
+            return {
+                'similarity': 0.2, 
+                'match_type': 'non_numeric', 
+                'confidence': 'LOW',
+                'reason': f"Non-numeric comparison"
+            }
+    
+    def assess_address_completeness(self, row):
+        """Assess completeness of geocoded address information"""
+        required_fields = ['Street_Name', 'Postal_Code', 'City', 'Province_Name']
+        present_count = 0
+        
+        for field in required_fields:
+            value = row.get(field)
+            if pd.notna(value) and str(value).strip() != '':
+                present_count += 1
+        
+        completeness_score = present_count / len(required_fields)
+        
+        return {
+            'completeness_score': completeness_score,
+            'present_fields': present_count,
+            'total_required': len(required_fields)
+        }
+    
+    def classify_address_quality_enhanced(self, row):
+        """
+        Enhanced address quality classification with ULTRA_HIGH confidence level
+        v2.9.8: Improved number matching and address completeness assessment
+        """
+        enhanced_config = self.config.get("enhanced_classification", {})
+        ultra_high_threshold = enhanced_config.get("ultra_high_completeness_threshold", 0.75)
+        high_threshold = enhanced_config.get("high_completeness_threshold", 0.5)
+        enable_ultra_high = enhanced_config.get("enable_ultra_high_confidence", True)
+        
+        original = str(row.get('cleaned_ubicazione', '')).strip()
+        geocoded = str(row.get('Geocoded_Address_Italian', '')).strip()
+        has_geocoding = row.get('Geocoding_Status') == 'Success'
+        
+        # Use enhanced number extraction
+        original_num = self.extract_street_number_enhanced(original)
+        geocoded_num = self.extract_street_number_enhanced(geocoded) if has_geocoding else None
+        
+        # Handle SNC addresses
+        if 'SNC' in original.upper():
+            if has_geocoding and self.is_province_match(original, row.get('Province_Code')):
+                return {
+                    'Address_Confidence': 'MEDIUM',
+                    'Interpolation_Risk': False,
+                    'Best_Address': original,
+                    'Routing_Channel': 'AGENCY',
+                    'Quality_Notes': 'SNC address - province match verified',
+                    'Classification_Method': 'enhanced'
+                }
+            else:
+                return {
+                    'Address_Confidence': 'LOW',
+                    'Interpolation_Risk': True,
+                    'Best_Address': original,
+                    'Routing_Channel': 'AGENCY',
+                    'Quality_Notes': 'SNC address - geocoding failed or province mismatch',
+                    'Classification_Method': 'enhanced'
+                }
+        
+        # Enhanced number comparison
+        if original_num and geocoded_num:
+            similarity = self.calculate_number_similarity(original_num, geocoded_num)
+            completeness = self.assess_address_completeness(row)
+            
+            # ULTRA_HIGH confidence - perfect match with complete data
+            if (similarity['match_type'] == 'exact_match' and 
+                completeness['completeness_score'] >= ultra_high_threshold and 
+                enable_ultra_high):
+                return {
+                    'Address_Confidence': 'ULTRA_HIGH',
+                    'Interpolation_Risk': False,
+                    'Best_Address': geocoded,
+                    'Routing_Channel': 'DIRECT_MAIL',
+                    'Quality_Notes': f'Perfect verification - {similarity["reason"]} (completeness: {completeness["completeness_score"]:.0%})',
+                    'Classification_Method': 'enhanced'
+                }
+            
+            # HIGH confidence - exact or base match with good data
+            elif (similarity['match_type'] in ['exact_match', 'base_match'] and 
+                  completeness['completeness_score'] >= high_threshold):
+                return {
+                    'Address_Confidence': 'HIGH',
+                    'Interpolation_Risk': False,
+                    'Best_Address': geocoded,
+                    'Routing_Channel': 'DIRECT_MAIL',
+                    'Quality_Notes': f'Strong verification - {similarity["reason"]} (completeness: {completeness["completeness_score"]:.0%})',
+                    'Classification_Method': 'enhanced'
+                }
+            
+            # MEDIUM confidence - close numbers or lower completeness
+            elif similarity['match_type'] in ['adjacent_number', 'close_number']:
+                return {
+                    'Address_Confidence': 'MEDIUM',
+                    'Interpolation_Risk': True,
+                    'Best_Address': original,
+                    'Routing_Channel': 'DIRECT_MAIL',
+                    'Quality_Notes': f'Close match - {similarity["reason"]} - using original for safety',
+                    'Classification_Method': 'enhanced'
+                }
+            
+            else:  # Different numbers
+                return {
+                    'Address_Confidence': 'MEDIUM',
+                    'Interpolation_Risk': True,
+                    'Best_Address': original,
+                    'Routing_Channel': 'DIRECT_MAIL',
+                    'Quality_Notes': f'Number verification - {similarity["reason"]} - using original',
+                    'Classification_Method': 'enhanced'
+                }
+        
+        # Original has number, geocoding failed to provide one
+        elif original_num and not geocoded_num:
+            return {
+                'Address_Confidence': 'MEDIUM',
+                'Interpolation_Risk': False,
+                'Best_Address': original,
+                'Routing_Channel': 'DIRECT_MAIL',
+                'Quality_Notes': f'Original has number "{original_num}" but geocoding could not verify',
+                'Classification_Method': 'enhanced'
+            }
+        
+        # No original number, geocoding suggested one
+        elif not original_num and geocoded_num:
+            return {
+                'Address_Confidence': 'LOW',
+                'Interpolation_Risk': True,
+                'Best_Address': '',
+                'Routing_Channel': 'AGENCY',
+                'Quality_Notes': f'No original number, geocoding suggested "{geocoded_num}"',
+                'Classification_Method': 'enhanced'
+            }
+        
+        # No numbers anywhere
+        else:
+            return {
+                'Address_Confidence': 'LOW',
+                'Interpolation_Risk': False,
+                'Best_Address': '',
+                'Routing_Channel': 'AGENCY',
+                'Quality_Notes': 'No street number available in any source',
+                'Classification_Method': 'enhanced'
+            }
+
     def classify_address_quality(self, row):
         """
         Classify address quality based on original vs geocoded comparison.
-        v2.9: SNC addresses now classified as HIGH confidence for DIRECT_MAIL
+        v2.9.8: Now supports enhanced classification with configuration flag
         """
+        # Check if enhanced classification is enabled
+        enhanced_config = self.config.get("enhanced_classification", {})
+        if enhanced_config.get("enabled", False):
+            result = self.classify_address_quality_enhanced(row)
+            self.logger.info(f"Enhanced classification: {row.get('cleaned_ubicazione', '')[:30]}... -> {result['Address_Confidence']}")
+            return result
+        
+        # Original classification logic (unchanged for compatibility)
         original = str(row.get('cleaned_ubicazione', '')).strip()
         geocoded = str(row.get('Geocoded_Address_Italian', '')).strip()
         has_geocoding = row.get('Geocoding_Status') == 'Success'
@@ -678,7 +951,8 @@ class IntegratedLandAcquisitionPipeline:
                     'Interpolation_Risk': False, 
                     'Best_Address': original, 
                     'Routing_Channel': 'AGENCY', 
-                    'Quality_Notes': 'SNC address - province match verified'
+                    'Quality_Notes': 'SNC address - province match verified',
+                    'Classification_Method': 'original'
                 }
             else:
                 return {
@@ -686,23 +960,24 @@ class IntegratedLandAcquisitionPipeline:
                     'Interpolation_Risk': True, 
                     'Best_Address': original, 
                     'Routing_Channel': 'AGENCY', 
-                    'Quality_Notes': 'SNC address - geocoding failed or province mismatch'
+                    'Quality_Notes': 'SNC address - geocoding failed or province mismatch',
+                    'Classification_Method': 'original'
                 }
         
         elif original_num and geocoded_num and original_num == geocoded_num:
-            return {'Address_Confidence': 'HIGH', 'Interpolation_Risk': False, 'Best_Address': geocoded, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': 'Complete and verified address'}
+            return {'Address_Confidence': 'HIGH', 'Interpolation_Risk': False, 'Best_Address': geocoded, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': 'Complete and verified address', 'Classification_Method': 'original'}
         
         elif original_num and geocoded_num and original_num != geocoded_num:
-            return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': True, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Number mismatch. Using original number "{original_num}" instead of geocoded "{geocoded_num}"'}
+            return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': True, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Number mismatch. Using original number "{original_num}" instead of geocoded "{geocoded_num}"', 'Classification_Method': 'original'}
         
         elif not original_num and geocoded_num:
-            return {'Address_Confidence': 'LOW', 'Interpolation_Risk': True, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': 'Address has no number, geocoding API suggested one'}
+            return {'Address_Confidence': 'LOW', 'Interpolation_Risk': True, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': 'Address has no number, geocoding API suggested one', 'Classification_Method': 'original'}
         
         elif original_num and not geocoded_num:
-             return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': False, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Original address has number "{original_num}", but it could not be verified by geocoding.'}
+             return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': False, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Original address has number "{original_num}", but it could not be verified by geocoding.', 'Classification_Method': 'original'}
 
         else: # No numbers in either source
-            return {'Address_Confidence': 'LOW', 'Interpolation_Risk': False, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': 'No street number available in any source'}
+            return {'Address_Confidence': 'LOW', 'Interpolation_Risk': False, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': 'No street number available in any source', 'Classification_Method': 'original'}
     
     def classify_owner_type(self, cf):
         """Classify owner type based on CF"""

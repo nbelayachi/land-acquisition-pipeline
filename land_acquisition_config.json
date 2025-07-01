@@ -29,6 +29,13 @@
       "cache_expiry_days": 90,
       "sleep_between_calls": 1
     },
+
+    "enhanced_classification": {
+      "enabled": true,
+      "ultra_high_completeness_threshold": 0.75,
+      "high_completeness_threshold": 0.5,
+      "enable_ultra_high_confidence": true
+    },
     
     "cost_tracking": {
       "method": "manual_balance_check",
