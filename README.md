@@ -1,8 +1,8 @@
-# 🏠 Land Acquisition Pipeline v2.9.7
+# 🏠 Land Acquisition Pipeline v3.0.0
 
-**Status**: ✅ **PRODUCTION READY** - Enhanced with parcel ownership analysis  
-**Last Updated**: July 1, 2025  
-**Version**: 2.9.7 (Stable + Parcel Ownership Feature)
+**Status**: ✅ **PRODUCTION READY** - Added strategic mailing list output
+**Last Updated**: July 1, 2025
+**Version**: 3.0.0 (Stable + Final Mailing Feature)
 
 ## 📋 **What This Does**
 
@@ -26,8 +26,9 @@ python campaign_launcher.py
 # Follow prompts to launch campaign
 ```
 
-### Output Structure (v2.9.7)
-Single file: `[Campaign_Name]_Results.xlsx` with 7 sheets:
+### Output Structure (v3.0.0)
+Single file: `[Campaign_Name]_Results.xlsx` with 8 sheets:
+- **🆕 Strategic_Mailing_List: Primary output for mailing, grouped by input parcels to show all owners and their high-confidence addresses.
 - **All_Raw_Data**: Complete raw property owner data
 - **All_Validation_Ready**: Processed contacts ready for outreach  
 - **All_Companies_Found**: Company owners with PEC emails
@@ -36,7 +37,11 @@ Single file: `[Campaign_Name]_Results.xlsx` with 7 sheets:
 - **🆕 Owners_By_Parcel**: Complete ownership per parcel (user-friendly)
 - **🆕 Owners_Normalized**: Power BI ready ownership data
 
-## 📊 **Current Status (v2.9.7)**
+## 📊 **Current Status (v3.0.0)**
+
+### 🆕 **New in v3.0.0**
+- **Strategic_Mailing_List Sheet**: New primary output sheet grouped by input parcels. It lists all associated owners and all their known high-confidence mailing addresses for comprehensive campaign planning.
+- **Refined Address Parsing**: Improved the street number extraction logic to correctly handle addresses where numbers are part of the proper name (e.g., "Via 4 Novembre"), increasing classification accuracy.
 
 ### ✅ **Working Features**
 - **Single Consolidated Output**: One Excel file per campaign
@@ -121,4 +126,4 @@ Edit `land_acquisition_config.json`:
 - **Version History**: See `doc/CHANGELOG.md`
 
 ---
-**🎯 Ready for production use. All critical v2.9.6 fixes verified and tested.**
+**🎯 Ready for production use. All critical v3.0.0 fixes verified and tested.**
