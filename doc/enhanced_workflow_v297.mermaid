@@ -1,0 +1,157 @@
+flowchart TB
+ subgraph P1["Phase 1: Land Selection & Input Preparation"]
+        B["Select Target Parcels<br>~500-1000 Ha"]
+        A["Technical Team:<br>Land Suitability Analysis"]
+        C["Create Input Excel<br>7 Required Fields"]
+        D{"Sezione<br>Required?"}
+        E["Land Manager:<br>Check SISTER Portal"]
+        F["Launch Campaign"]
+  end
+ subgraph P2["Phase 2: Automated Pipeline Processing v2.9.7"]
+        G["campaign_launcher.py<br>Initialize Campaign"]
+        H["land_acquisition_pipeline.py<br>Process Municipalities"]
+        I["Catasto API:<br>Get Property Owners"]
+        J["Parse Owner Data<br>Extract All Properties"]
+        T1["Save Request ID<br>for Recovery"]
+        K{"Owner Type<br>Classification"}
+        L["Filter Cat.A<br>Residential Only"]
+        M["Company Processing"]
+        N["Address Cleaning<br>Remove Floor/Apt Info"]
+        O["PEC Email API<br>Get Certified Email"]
+        P["Geocoding API<br>Enhance Addresses"]
+        Q["Extract ZIP Code<br>+ 17 Fields"]
+        T2["Save for Recovery"]
+        R["Address Quality<br>Classification v2.9"]
+        S["Companies_Found.xlsx"]
+  end
+ subgraph P3["Phase 3: Address Quality Intelligence v2.9"]
+        U1{"SNC<br>Check"}
+        V1["HIGH Confidence<br>→ DIRECT_MAIL"]
+        U2{"Number<br>Match?"}
+        V2["HIGH Confidence<br>→ DIRECT_MAIL"]
+        V3["MEDIUM Confidence<br>→ DIRECT_MAIL<br>Use Original"]
+        U3{"Geocoded<br>Number?"}
+        V4["LOW: Interpolated<br>→ AGENCY"]
+        V5["LOW: No Number<br>→ AGENCY"]
+        W["Deduplication:<br>CF + Address"]
+  end
+ subgraph P3B["🆕 Phase 3B: Parcel Ownership Analysis v2.9.7"]
+        POA1["Group Raw Data by<br>(comune + foglio + particella)"]
+        POA2["Identify Unique Owners<br>per Parcel"]
+        POA3["Preserve Quota Information<br>(fractions/percentages)"]
+        POA4["Create Wide Format<br>Up to 10 owners per parcel"]
+        POA5["Create Normalized Format<br>Power BI ready"]
+        POA6["Co-ownership Analysis<br>& Strategic Intelligence"]
+  end
+ subgraph P4["Phase 4: Enhanced Output & Analytics v2.9.7"]
+        X["Generate 7 Files<br>Track Funnel + Ownership"]
+        Y1["Validation_Ready.xlsx<br>Deduplicated Contacts"]
+        Y2["Municipality_Summary<br>15+ Metrics + Funnel Data"]
+        Y3["Raw_Data.xlsx<br>Complete Dataset"]
+        Y4["Companies with PEC"]
+        Y5["🆕 Owners_By_Parcel.xlsx<br>User-Friendly Wide Format"]
+        Y6["🆕 Owners_Normalized.xlsx<br>Power BI Analytics Ready"]
+        Z1["OneDrive Sync"]
+        Z2["PowerBI_Dataset.csv<br>Campaign Analytics"]
+  end
+ subgraph P5["Phase 5: Strategic Planning & Outreach v2.9.7"]
+        SP1["🆕 Ownership Analysis:<br>Simple vs Complex Parcels"]
+        SP2["🆕 Negotiation Strategy:<br>Single vs Multi-owner"]
+        AA["Land Team:<br>Review Addresses + Ownership"]
+        AB{"Route by<br>Channel + Complexity"}
+        AC["Print Service"]
+        AD["Local Agencies<br>Manual Contact"]
+        AE["PEC Outreach"]
+        AF["Response Tracking"]
+        SP3["🆕 Power BI Dashboard<br>Ownership Analytics"]
+  end
+    A --> B
+    B --> C
+    C --> D
+    D -- Yes: Bologna, Valsamoggia --> E
+    D -- No: Most municipalities --> F
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I -- Success --> J
+    I -- Timeout --> T1
+    J --> K
+    K -- Privato<br>CF starts with letter --> L
+    K -- Azienda<br>CF starts with digit --> M
+    L --> N
+    M --> O
+    N --> P
+    P -- Success --> Q
+    P -- Timeout --> T2
+    Q --> R
+    O --> S
+    R --> U1
+    U1 -- Yes: Small street --> V1
+    U1 -- No --> U2
+    U2 -- "Original = Geocoded" --> V2
+    U2 -- Original ≠ Geocoded --> V3
+    U2 -- No Original Number --> U3
+    U3 -- Yes --> V4
+    U3 -- No --> V5
+    V1 --> W
+    V2 --> W
+    V3 --> W
+    V4 --> W
+    V5 --> W
+    W --> POA1
+    POA1 --> POA2
+    POA2 --> POA3
+    POA3 --> POA4 & POA5
+    POA4 --> POA6
+    POA5 --> POA6
+    POA6 --> X
+    X --> Y1 & Y2 & Y3 & Y5 & Y6
+    S --> Y4
+    Y1 --> Z1 & AA
+    Y2 --> Z1
+    Y3 --> Z1
+    Y4 --> Z1 & AE
+    Y5 --> Z1 & SP1
+    Y6 --> Z1 & SP3
+    Z1 --> Z2
+    SP1 --> SP2
+    SP2 --> AA
+    AA --> AB
+    AB -- DIRECT_MAIL --> AC
+    AB -- AGENCY --> AD
+    AC --> AF
+    AD --> AF
+    AE --> AF
+    T1 --> T3["Timeout Recovery<br>After Campaign"]
+    T2 --> T3
+    T3 -.-> J & Q
+    H -.-> FM["Funnel Metrics:<br>• Input: X parcels, Y hectares<br>• After API: X1 parcels, Y1 ha<br>• Private: X2, Company: X3<br>• After Cat.A: X4 parcels, Y4 ha<br>• Final: X5 contacts"]
+    POA6 -.-> OM["🆕 Ownership Metrics:<br>• Total parcels: X<br>• Single-owner: Y (simple)<br>• Multi-owner: Z (complex)<br>• Max co-owners: N<br>• Strategic priority ranking"]
+    Y2 -.-> M1["v2.9 Enhancements:<br>• SNC → Direct Mail<br>• Full Funnel Visibility<br>• Company Integration"]
+    Y5 & Y6 -.-> M2["🆕 v2.9.7 Enhancements:<br>• Complete Ownership Database<br>• Co-ownership Analysis<br>• Power BI Integration<br>• Strategic Intelligence"]
+    Z2 ==> NP["🎯 COMPLETE: 7-Sheet<br>Output with Ownership Analysis"]
+
+    style R fill:#4caf50,color:#fff
+    style V1 fill:#FFFFFF
+    style POA1 fill:#ff9800,color:#fff
+    style POA2 fill:#ff9800,color:#fff
+    style POA3 fill:#ff9800,color:#fff
+    style POA4 fill:#ff9800,color:#fff
+    style POA5 fill:#ff9800,color:#fff
+    style POA6 fill:#ff9800,color:#fff
+    style Y5 fill:#ff9800,color:#fff
+    style Y6 fill:#ff9800,color:#fff
+    style SP1 fill:#ff9800,color:#fff
+    style SP2 fill:#ff9800,color:#fff
+    style SP3 fill:#ff9800,color:#fff
+    style FM fill:#ffeb3b,color:#000
+    style OM fill:#ff9800,color:#fff
+    style M2 fill:#ff9800,color:#fff
+    style NP fill:#4caf50,color:#fff
+    style P1 fill:#e3f2fd
+    style P2 fill:#f3e5f5
+    style P3 fill:#e8f5e9
+    style P3B fill:#fff3e0
+    style P4 fill:#fff3e0
+    style P5 fill:#fce4ec
