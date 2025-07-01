@@ -873,6 +873,11 @@ Best,
                 pec_success_rate = (companies_with_pec / total_companies_for_pec) * 100
 
         summary_dict = {
+            # Traceability columns
+            "CP": municipality_data['CP'],
+            "comune": municipality_data['comune'],
+            "provincia": municipality_data.get('provincia', ''),
+            
             # Existing metrics
             "Input_Parcels": municipality_data['parcel_count'],
             "API_Success_Rate": api_success_rate,
@@ -895,7 +900,7 @@ Best,
             "Company_Owner_Area_Ha": funnel_metrics.get("company_owner_area_ha", 0) if funnel_metrics else 0,
             "After_CatA_Filter_Parcels": funnel_metrics.get("after_cata_filter_parcels", 0) if funnel_metrics else 0,
             "After_CatA_Filter_Area_Ha": funnel_metrics.get("after_cata_filter_area_ha", 0) if funnel_metrics else 0,
-            "Unique_Owner_Address_Pairs": funnel_metrics.get("unique_contacts", 0) if funnel_metrics else 0, # RENAMED
+            "Unique_Owner_Address_Pairs": len(validation_ready) if not validation_ready.empty else 0, # FIXED
             "Direct_Mail_Final_Contacts": direct_mail_contacts, # REVISED
             "Direct_Mail_Final_Area_Ha": hectares_direct_mail, # REVISED
             "Agency_Final_Contacts": agency_contacts, # REVISED
@@ -1192,30 +1197,46 @@ Best,
             return []
 
     def run_complete_campaign(self, input_file, campaign_name, start_balance=None):
-        """Main method to run the complete integrated campaign."""
-        print(f"\n🚀 ENHANCED LAND ACQUISITION CAMPAIGN v2.9: {campaign_name}")
+        """v2.9.5: Main method to run the campaign, now aggregates all results into a single file."""
+        print(f"\n🚀 ENHANCED LAND ACQUISITION CAMPAIGN v2.9.5: {campaign_name}")
         if start_balance is None:
             start_balance = self.get_manual_balance_input("start")
         else:
             self.campaign_stats["start_balance"] = start_balance
         
         try:
-            # Ensure Area is read as string to handle commas
             df = pd.read_excel(input_file, dtype={'Area': str})
         except Exception as e:
             print(f"❌ Failed to load input file: {e}"); return None
         
         self.analyze_input_structure(df)
-        municipality_structure = self.create_municipality_structure(df, campaign_name)
+        municipality_groups = df.groupby(['CP', 'comune'])
         token = self.config.get("api_settings", {}).get("token", "")
         if not token or token == "YOUR_TOKEN_HERE":
             print("❌ Please update your API token in land_acquisition_config.json"); return None
         
-        municipality_results = []
-        for municipality_key, municipality_data in municipality_structure.items():
-            result = self.process_municipality(municipality_key, municipality_data, token)
-            if result:
-                municipality_results.append(result)
+        # v2.9.5: Lists to hold results from all municipalities
+        all_raw_data = []
+        all_validation_ready = []
+        all_companies_found = []
+        all_summaries = []
+        all_funnels = []
+
+        for (cp, comune), group in municipality_groups:
+            municipality_key = f"{cp}_{comune.replace(' ', '_')}" # Use a descriptive key
+            municipality_data = {"CP": cp, "comune": comune, "parcel_count": len(group), "dataframe": group}
+            
+            # Process data in memory
+            processed_results = self.process_municipality(municipality_key, municipality_data, token)
+            
+            if processed_results:
+                # Append results to the master lists
+                all_raw_data.append(processed_results['raw_data'])
+                all_validation_ready.append(processed_results['validation_ready'])
+                all_companies_found.append(processed_results['companies_found'])
+                all_summaries.append(processed_results['summary'])
+                all_funnels.append(processed_results['funnel'])
+
             self.save_cache()
             if self.geocoding_enabled: self.save_geocoding_cache()
             if self.pec_enabled: self.save_pec_cache()
@@ -1225,14 +1246,17 @@ Best,
         if self.geocoding_enabled and self.campaign_stats["geocoding_timeout_requests"] > 0:
             self.recover_geocoding_timeout_requests()
         
+        # v2.9.5: Create the single, consolidated output file
+        self.create_consolidated_excel_output(campaign_name, all_raw_data, all_validation_ready, all_companies_found, all_summaries, all_funnels)
+
         self.get_manual_balance_input("end")
         campaign_dir = os.path.join(self.config.get("output_structure", {}).get("completed_campaigns_dir", "completed_campaigns"), campaign_name)
         self.create_enhanced_cost_summary(campaign_name, campaign_dir)
-        if municipality_results:
-            self.create_powerbi_export(campaign_name, campaign_dir)
+        # PowerBI export can be adapted or removed if the new summary is sufficient
+        # self.create_powerbi_export(campaign_name, campaign_dir)
         self.copy_to_onedrive(campaign_name, campaign_dir)
         
-        print(f"\n✅ ENHANCED CAMPAIGN COMPLETED (v2.9)")
+        print(f"\n✅ ENHANCED CAMPAIGN COMPLETED (v2.9.5)")
 
     def create_enhanced_cost_summary(self, campaign_name, campaign_dir):
         """Create enhanced cost summary."""
@@ -1337,139 +1361,122 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         return base
 
     def create_municipality_output(self, municipality_key, municipality_data, raw_results, funnel_metrics):
-        """Create comprehensive output for a municipality with funnel tracking."""
-        directory = municipality_data['directory']
+        """v2.9.5: Processes data for a single municipality and returns a dictionary of DataFrames."""
         df_raw = pd.DataFrame(raw_results)
         if df_raw.empty:
-            print(f"   ⚠️  No raw results for {municipality_key}"); return None
+            self.logger.warning(f"No raw results for {municipality_key}")
+            return None
+        
+        # Add CP and Comune to raw data for consolidated output
+        df_raw['CP'] = municipality_data['CP']
+        df_raw['comune'] = municipality_data['comune']
         df_raw['Tipo_Proprietario'] = df_raw['cf'].apply(self.classify_owner_type)
         
-        # v2.9: Track owner classification
+        # --- Funnel Tracking ---
         if 'Tipo_Proprietario' in df_raw.columns:
             private_mask = df_raw['Tipo_Proprietario'] == 'Privato'
             company_mask = df_raw['Tipo_Proprietario'] == 'Azienda'
-            
-            # Count unique parcels by owner type
             private_parcels = df_raw[private_mask][['foglio_input', 'particella_input']].drop_duplicates()
             company_parcels = df_raw[company_mask][['foglio_input', 'particella_input']].drop_duplicates()
-            
             funnel_metrics["private_owner_parcels"] = len(private_parcels)
             funnel_metrics["company_owner_parcels"] = len(company_parcels)
+
+            # Sum area for unique parcels (with proper decimal handling)
+            private_area_df = df_raw[private_mask].drop_duplicates(subset=['foglio_input', 'particella_input'])
+            funnel_metrics["private_owner_area_ha"] = pd.to_numeric(private_area_df['Area'].astype(str).str.replace(',', '.'), errors='coerce').fillna(0).sum()
             
-            # Sum area (avoiding double counting)
-            for _, parcel in private_parcels.iterrows():
-                matching_rows = municipality_data['dataframe'][
-                    (municipality_data['dataframe']['foglio'] == parcel['foglio_input']) & 
-                    (municipality_data['dataframe']['particella'] == parcel['particella_input'])
-                ]
-                if len(matching_rows) > 0:
-                    area = pd.to_numeric(str(matching_rows['Area'].iloc[0]).replace(',', '.'), errors='coerce') or 0
-                    funnel_metrics["private_owner_area_ha"] += area
-            
-            for _, parcel in company_parcels.iterrows():
-                matching_rows = municipality_data['dataframe'][
-                    (municipality_data['dataframe']['foglio'] == parcel['foglio_input']) & 
-                    (municipality_data['dataframe']['particella'] == parcel['particella_input'])
-                ]
-                if len(matching_rows) > 0:
-                    area = pd.to_numeric(str(matching_rows['Area'].iloc[0]).replace(',', '.'), errors='coerce') or 0
-                    funnel_metrics["company_owner_area_ha"] += area
-        
+            company_area_df = df_raw[company_mask].drop_duplicates(subset=['foglio_input', 'particella_input'])
+            funnel_metrics["company_owner_area_ha"] = pd.to_numeric(company_area_df['Area'].astype(str).str.replace(',', '.'), errors='coerce').fillna(0).sum()
+
         individuals_cat_a = df_raw[(df_raw['Tipo_Proprietario'] == 'Privato') & (df_raw['classamento'].str.contains('Cat.A', na=False, case=False))]
         companies_found = df_raw[(df_raw['Tipo_Proprietario'] == 'Azienda')].copy()
         
-        # v2.9: Track Cat.A filtering
         if not individuals_cat_a.empty:
             cat_a_parcels = individuals_cat_a[['foglio_input', 'particella_input']].drop_duplicates()
             funnel_metrics["after_cata_filter_parcels"] = len(cat_a_parcels)
-            
-            # Calculate area for Cat.A filtered parcels
-            for _, parcel in cat_a_parcels.iterrows():
-                matching_rows = municipality_data['dataframe'][
-                    (municipality_data['dataframe']['foglio'] == parcel['foglio_input']) & 
-                    (municipality_data['dataframe']['particella'] == parcel['particella_input'])
-                ]
-                if len(matching_rows) > 0:
-                    area = pd.to_numeric(str(matching_rows['Area'].iloc[0]).replace(',', '.'), errors='coerce') or 0
-                    funnel_metrics["after_cata_filter_area_ha"] += area
-        
+            cat_a_area_df = individuals_cat_a.drop_duplicates(subset=['foglio_input', 'particella_input'])
+            funnel_metrics["after_cata_filter_area_ha"] = pd.to_numeric(cat_a_area_df['Area'].astype(str).str.replace(',', '.'), errors='coerce').fillna(0).sum()
+
         validation_ready = pd.DataFrame()
         if not individuals_cat_a.empty:
-            required_cols = ['foglio_input', 'particella_input', 'cognome', 'nome', 'ubicazione', 'cf', 'Area']
-            validation_ready = individuals_cat_a[[col for col in required_cols if col in individuals_cat_a.columns]].copy()
+            validation_ready = individuals_cat_a.copy()
             validation_ready = self.clean_addresses_safe(validation_ready)
             if self.geocoding_enabled:
                 validation_ready = self.enhance_addresses_with_geocoding(validation_ready)
                 classification_results = validation_ready.apply(self.classify_address_quality, axis=1).apply(pd.Series)
                 validation_ready = pd.concat([validation_ready, classification_results], axis=1)
-            # v2.9.1 BUG FIX: Preserve unique parcels by including foglio/particella in deduplication
             validation_ready.drop_duplicates(subset=['cf', 'cleaned_ubicazione', 'foglio_input', 'particella_input'], inplace=True)
-            
-            # v2.9.3 BUG FIX: Ensure funnel metrics use the same de-duplicated area calculation
-            if not validation_ready.empty:
-                funnel_metrics["unique_contacts"] = len(validation_ready)
-                
-                if 'Routing_Channel' in validation_ready.columns:
-                    direct_mail_df = validation_ready[validation_ready['Routing_Channel'] == 'DIRECT_MAIL']
-                    agency_df = validation_ready[validation_ready['Routing_Channel'] == 'AGENCY']
-                    
-                    funnel_metrics["direct_mail_contacts"] = len(direct_mail_df)
-                    funnel_metrics["agency_contacts"] = len(agency_df)
-                    
-                    # Use de-duplicated parcel data for area calculation
-                    funnel_metrics["direct_mail_area_ha"] = direct_mail_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
-                    funnel_metrics["agency_area_ha"] = agency_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
-            
+
         if self.pec_enabled and not companies_found.empty:
             print(f"   📧 Enhancing {len(companies_found)} company records with PEC emails...")
             pec_results = companies_found['cf'].apply(self.get_company_pec)
             companies_found[['pec_email', 'pec_status']] = pec_results.apply(pd.Series)
             time.sleep(self.pec_sleep)
 
-        output_file = os.path.join(directory, f"{municipality_key}_Results.xlsx")
+        # --- Final Summary and Funnel Creation ---
         summary_data = self.create_municipality_summary(municipality_key, municipality_data, df_raw, validation_ready, companies_found, funnel_metrics)
+        funnel_df = self.create_funnel_analysis_df(summary_data, funnel_metrics, municipality_data)
+
+        print(f"   📊 Funnel Analysis: {funnel_metrics['input_parcels']} parcels → {summary_data['Unique_Owner_Address_Pairs']} contacts")
         
-        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-            df_raw.to_excel(writer, sheet_name='Raw_Data', index=False)
-            if not validation_ready.empty: validation_ready.to_excel(writer, sheet_name='Validation_Ready', index=False)
-            if not companies_found.empty: companies_found.to_excel(writer, sheet_name='Companies_Found', index=False)
-            pd.DataFrame(list(summary_data.items()), columns=['Metric', 'Value']).to_excel(writer, sheet_name='Municipality_Summary', index=False)
-            
-            # v2.9.4 FINAL FIX: Use the corrected summary metrics to build the funnel sheet for consistency
-            if funnel_metrics:
-                summary_metrics = self.create_municipality_summary(municipality_key, municipality_data, df_raw, validation_ready, companies_found, funnel_metrics)
-                funnel_df = pd.DataFrame([
-                    {"Stage": "1. Input", "Parcels": funnel_metrics["input_parcels"], 
-                     "Hectares": funnel_metrics["input_area_ha"], "Description": "Initial parcels from input file"},
-                    {"Stage": "2. After API", "Parcels": funnel_metrics["after_api_parcels"], 
-                     "Hectares": funnel_metrics["after_api_area_ha"], "Description": "Parcels with owner data retrieved"},
-                    {"Stage": "3. Private Owners", "Parcels": summary_metrics["Private_Owner_Parcels"], 
-                     "Hectares": summary_metrics["Private_Owner_Area_Ha"], "Description": "Individual owner parcels"},
-                    {"Stage": "4. Company Owners", "Parcels": summary_metrics["Company_Owner_Parcels"], 
-                     "Hectares": summary_metrics["Company_Owner_Area_Ha"], "Description": "Company-owned parcels (bypass Cat.A)"},
-                    {"Stage": "5. After Cat.A Filter", "Parcels": summary_metrics["After_CatA_Filter_Parcels"], 
-                     "Hectares": summary_metrics["After_CatA_Filter_Area_Ha"], "Description": "Residential properties only"},
-                    {"Stage": "6. Unique Contacts", "Parcels": "-", 
-                     "Hectares": "-", "Description": f'{summary_metrics["Unique_Owner_Address_Pairs"]} deduplicated contacts'},
-                    {"Stage": "7. Direct Mail", "Parcels": "-", 
-                     "Hectares": summary_metrics["Direct_Mail_Final_Area_Ha"], 
-                     "Description": f'{summary_metrics["Direct_Mail_Final_Contacts"]} contacts via direct mail'},
-                    {"Stage": "8. Agency Required", "Parcels": "-", 
-                     "Hectares": summary_metrics["Agency_Final_Area_Ha"], 
-                     "Description": f'{summary_metrics["Agency_Final_Contacts"]} contacts via agency'},
-                ])
-                funnel_df.to_excel(writer, sheet_name='Funnel_Analysis', index=False)
-        
-        self.campaign_stats["municipalities_processed"][municipality_key] = {
-            "CP": municipality_data['CP'], "comune": municipality_data['comune'],
-            "summary_metrics": summary_data
+        return {
+            "raw_data": df_raw,
+            "validation_ready": validation_ready,
+            "companies_found": companies_found,
+            "summary": summary_data,
+            "funnel": funnel_df
         }
+
+    def create_funnel_analysis_df(self, summary_metrics, funnel_metrics, municipality_data):
+        """v2.9.5: Creates the Funnel Analysis DataFrame for a single municipality."""
+        provincia = municipality_data.get('provincia', '')
+        funnel_df = pd.DataFrame([
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "1. Input", "Parcels": funnel_metrics["input_parcels"], "Hectares": funnel_metrics["input_area_ha"], "Description": "Initial parcels from input file"},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "2. After API", "Parcels": funnel_metrics["after_api_parcels"], "Hectares": funnel_metrics["after_api_area_ha"], "Description": "Parcels with owner data retrieved"},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "3. Private Owners", "Parcels": summary_metrics["Private_Owner_Parcels"], "Hectares": summary_metrics["Private_Owner_Area_Ha"], "Description": "Individual owner parcels"},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "4. Company Owners", "Parcels": summary_metrics["Company_Owner_Parcels"], "Hectares": summary_metrics["Company_Owner_Area_Ha"], "Description": "Company-owned parcels (bypass Cat.A)"},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "5. After Cat.A Filter", "Parcels": summary_metrics["After_CatA_Filter_Parcels"], "Hectares": summary_metrics["After_CatA_Filter_Area_Ha"], "Description": "Residential properties only"},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "6. Unique Contacts", "Parcels": "-", "Hectares": "-", "Description": f'{summary_metrics["Unique_Owner_Address_Pairs"]} deduplicated contacts'},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "7. Direct Mail", "Parcels": "-", "Hectares": summary_metrics["Direct_Mail_Final_Area_Ha"], "Description": f'{summary_metrics["Direct_Mail_Final_Contacts"]} contacts via direct mail'},
+            {"CP": municipality_data['CP'], "comune": municipality_data['comune'], "provincia": provincia, "Stage": "8. Agency Required", "Parcels": "-", "Hectares": summary_metrics["Agency_Final_Area_Ha"], "Description": f'{summary_metrics["Agency_Final_Contacts"]} contacts via agency'},
+        ])
+        return funnel_df
+
+    def create_consolidated_excel_output(self, campaign_name, all_raw_data, all_validation_ready, all_companies_found, all_summaries, all_funnels):
+        """v2.9.5: Creates a single, consolidated Excel file with all campaign results."""
+        campaign_dir = os.path.join(self.config.get("output_structure", {}).get("completed_campaigns_dir", "completed_campaigns"), campaign_name)
+        os.makedirs(campaign_dir, exist_ok=True)
+        output_file = os.path.join(campaign_dir, f"{campaign_name}_Results.xlsx")
+
+        print(f"\n consolidating results into single file: {output_file}")
+
+        # Concatenate all dataframes from the lists
+        df_all_raw = pd.concat(all_raw_data, ignore_index=True) if all_raw_data else pd.DataFrame()
+        df_all_validation_ready = pd.concat(all_validation_ready, ignore_index=True) if all_validation_ready else pd.DataFrame()
+        df_all_companies = pd.concat(all_companies_found, ignore_index=True) if all_companies_found else pd.DataFrame()
+        df_campaign_summary = pd.DataFrame(all_summaries) if all_summaries else pd.DataFrame()
+        df_all_funnels = pd.concat(all_funnels, ignore_index=True) if all_funnels else pd.DataFrame()
+
+        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+            if not df_all_validation_ready.empty:
+                df_all_validation_ready.to_excel(writer, sheet_name='All_Validation_Ready', index=False)
+            # Always create All_Companies_Found sheet (even if empty)
+            if not df_all_companies.empty:
+                df_all_companies.to_excel(writer, sheet_name='All_Companies_Found', index=False)
+                print(f"   📋 All_Companies_Found: {len(df_all_companies)} company records")
+            else:
+                # Create empty companies sheet with expected structure
+                empty_companies_df = pd.DataFrame(columns=['CP', 'comune', 'provincia', 'denominazione', 'cf', 'pec_email', 'pec_status'])
+                empty_companies_df.to_excel(writer, sheet_name='All_Companies_Found', index=False)
+                print(f"   📋 All_Companies_Found: 0 company records (empty sheet created)")
+            if not df_campaign_summary.empty:
+                df_campaign_summary.to_excel(writer, sheet_name='Campaign_Summary', index=False)
+            if not df_all_funnels.empty:
+                df_all_funnels.to_excel(writer, sheet_name='Funnel_Analysis', index=False)
+            if not df_all_raw.empty:
+                df_all_raw.to_excel(writer, sheet_name='All_Raw_Data', index=False)
         
-        self.campaign_stats["validation_ready_count"] += len(validation_ready)
-        
-        print(f"   📁 Output saved: {os.path.basename(output_file)}")
-        print(f"   📊 Funnel Analysis: {funnel_metrics['input_parcels']} parcels → {funnel_metrics['unique_contacts']} contacts")
-        return {"municipality_key": municipality_key}
+        print(f"   ✅ Consolidated output saved: {os.path.basename(output_file)}")
 
 
 if __name__ == "__main__":

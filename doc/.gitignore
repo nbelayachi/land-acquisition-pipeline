@@ -13,10 +13,8 @@ campaigns/
 completed_campaigns/
 local_processing/
 
-# Test files and temporary data
+# Test files
 test*.xlsx
-*_input.xlsx
-*_Results.xlsx
 
 # Backup files
 *_backup_*.py
@@ -24,7 +22,6 @@ test*.xlsx
 # Temporary Office files
 ~$*.xlsx
 ~$*.docx
-~$*.pptx
 
 # Development and analysis files
 *_analysis_*.txt
@@ -35,29 +32,12 @@ campaign_analysis_*.txt
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
-
-# Virtual environment
-venv/
-env/
-.env
 
 # IDE files
 .vscode/
-.idea/
-*.swp
-*.swo
+*.idea/
 
 # OS files
 .DS_Store
 Thumbs.db
-Desktop.ini
-
-# Configuration files with sensitive data
-*config*.json.local
-*config*.json.backup
-.env.local
-
-# PowerBI and other output files
-PowerBI_Dataset.csv
-Enhanced_Cost_Summary.txt
+EOF < /dev/null
