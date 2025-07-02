@@ -1,0 +1,5 @@
+Quality_Level,Count,Percentage,Processing_Type,Business_Value,Automation_Level,Routing_Decision
+ULTRA_HIGH,4,17.4,Zero Touch,Immediate print ready,Fully-Auto,Direct Mail
+HIGH,1,4.3,Quick Review,Minimal validation needed,Semi-Auto,Direct Mail
+MEDIUM,13,56.5,Standard Review,Normal processing required,Manual,Mixed (Direct Mail + Agency)
+LOW,5,21.7,Agency Routing,External investigation required,Manual,Agency

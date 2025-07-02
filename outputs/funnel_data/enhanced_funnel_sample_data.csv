@@ -1,0 +1,18 @@
+Funnel_Type,Stage,Count,Hectares,Conversion_Rate,Cumulative_Loss,Business_Rule,Time_Impact_Minutes,Automation_Level,CP,comune,provincia
+Land Acquisition,1. Input Parcels,10,56.9,,0.0,User input - parcels selected for acquisition analysis,0,Manual,Mixed,Multiple,LO/BS
+Land Acquisition,2. API Data Retrieved,10,56.9,100.0,0.0,API successfully retrieved ownership data for all parcels,0,Fully-Auto,Mixed,Multiple,LO/BS
+Land Acquisition,3. Private Owners Only,10,56.9,100.0,0.0,Filter applied - no company owners found in this campaign,0,Fully-Auto,Mixed,Multiple,LO/BS
+Land Acquisition,4. Category A Filter Applied,8,53.0,80.0,20.0,Category A filter removed 2 parcels (3.9 ha) - non-residential properties,0,Fully-Auto,Mixed,Multiple,LO/BS
+Contact Generation,0. Category A Parcels (Input),8,53.0,,0.0,Input from Land Acquisition Pipeline - filtered parcels ready for contact processing,0,Fully-Auto,Mixed,Multiple,LO/BS
+Contact Generation,1. Unique Owners Identified,10,53.0,125.0,0.0,"Owner identification - some parcels have multiple owners, some owners appear on multiple parcels",0,Fully-Auto,Mixed,Multiple,LO/BS
+Contact Generation,2. Owner-Address Pairs Created,23,53.0,230.0,0.0,"Address expansion - owners have multiple addresses (current, historical, etc.)",0,Fully-Auto,Mixed,Multiple,LO/BS
+Contact Generation,3. Address Quality Assessment,23,53.0,100.0,0.0,Enhanced classification applied - geocoding and confidence scoring completed,0,Fully-Auto,Mixed,Multiple,LO/BS
+Contact Generation,4. Direct Mail Routing,12,42.2,52.2,47.8,ULTRA_HIGH + HIGH + some MEDIUM confidence addresses routed for direct mailing,35,Semi-Auto,Mixed,Multiple,LO/BS
+Contact Generation,4. Agency Review Routing,11,38.5,47.8,52.2,LOW confidence + some MEDIUM confidence addresses require agency investigation,0,Manual,Mixed,Multiple,LO/BS
+Address Quality,1. Raw Addresses Collected,23,53.0,,0.0,All owner-address pairs identified and collected for quality assessment,184,Manual,Mixed,Multiple,LO/BS
+Address Quality,2. Geocoding Attempted,23,53.0,100.0,0.0,All addresses submitted to geocoding API for verification and enhancement,0,Fully-Auto,Mixed,Multiple,LO/BS
+Address Quality,3. Geocoding Successful,23,53.0,100.0,0.0,All addresses successfully geocoded - no failures in this campaign,0,Fully-Auto,Mixed,Multiple,LO/BS
+Address Quality,4. ULTRA_HIGH Confidence,4,16.9,17.4,82.6,Perfect address match + complete geocoding data - ready for immediate printing,0,Fully-Auto,Mixed,Multiple,LO/BS
+Address Quality,4. HIGH Confidence,1,2.6,4.3,95.7,Strong address match - requires 5-minute review before printing,5,Semi-Auto,Mixed,Multiple,LO/BS
+Address Quality,4. MEDIUM Confidence,13,28.3,56.5,43.5,Moderate address quality - requires standard 8-minute review,104,Manual,Mixed,Multiple,LO/BS
+Address Quality,4. LOW Confidence,5,5.2,21.7,78.3,Poor address quality - routed to agency for manual investigation,0,Manual,Mixed,Multiple,LO/BS

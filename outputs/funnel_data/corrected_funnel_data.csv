@@ -1,0 +1,10 @@
+Funnel_Type,Stage,Count,Hectares,Conversion_Rate,Retention_Rate,Business_Rule,Automation_Level,Process_Notes
+Land Acquisition,1. Input Parcels,10,56.9,,100.0,User input - parcels selected for acquisition analysis,Manual,Campaign input from user selection
+Land Acquisition,2. API Data Retrieved,10,56.9,100.0,100.0,API successfully retrieved ownership data for all parcels,Fully-Auto,Perfect API success rate in this campaign
+Land Acquisition,3. Private Owners Only,10,56.9,100.0,100.0,Filter applied - no company owners found in this campaign,Fully-Auto,"All owners were individuals, no companies to filter"
+Land Acquisition,4. Category A Filter,8,53.0,80.0,80.0,Category A filter removed 2 parcels (3.9 ha) - non-residential,Fully-Auto,20% loss due to property type filtering
+Contact Processing,1. Owners Identified,13,53.0,162.5,100.0,Owner identification - some parcels have multiple owners,Fully-Auto,1.63 owners per parcel on average (corrected from 1.25)
+Contact Processing,2. Address Pairs Created,23,53.0,177.0,100.0,"Address expansion - owners have multiple addresses (current, historical)",Fully-Auto,1.77 addresses per owner on average (corrected from 2.3)
+Contact Processing,3. Geocoding Completed,23,53.0,100.0,100.0,All addresses successfully geocoded and quality assessed,Fully-Auto,Perfect geocoding success rate
+Contact Processing,4. Direct Mail Ready,12,42.2,52.2,52.2,ULTRA_HIGH + HIGH + some MEDIUM confidence addresses,Semi-Auto,Higher confidence addresses for internal processing
+Contact Processing,5. Agency Required,11,38.5,47.8,47.8,LOW confidence + some MEDIUM confidence addresses,Manual,Lower confidence addresses need external expertise

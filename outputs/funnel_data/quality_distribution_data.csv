@@ -1,0 +1,5 @@
+Quality_Level,Count,Percentage,Review_Time_Minutes,Review_Type,Business_Value,Automation_Level
+ULTRA_HIGH,4,17.4,0,Zero Touch,Immediate print ready,Fully-Auto
+HIGH,1,4.3,5,Quick Review,5-minute validation,Semi-Auto
+MEDIUM,13,56.5,104,Standard Review,Normal processing,Manual
+LOW,5,21.7,0,Agency Routing,External investigation,Manual

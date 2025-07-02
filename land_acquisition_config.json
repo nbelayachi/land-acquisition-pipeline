@@ -36,6 +36,20 @@
       "high_completeness_threshold": 0.5,
       "enable_ultra_high_confidence": true
     },
+
+    "enhanced_funnel_analysis": {
+      "enabled": true,
+      "include_conversion_rates": true,
+      "include_business_rules": true,
+      "include_automation_levels": true,
+      "calculate_executive_kpis": true,
+      "include_quality_distribution": true,
+      "track_zero_touch_processing": true,
+      "excel_sheet_names": {
+        "enhanced_funnel": "Enhanced_Funnel_Analysis",
+        "quality_distribution": "Address_Quality_Distribution"
+      }
+    },
     
     "cost_tracking": {
       "method": "manual_balance_check",

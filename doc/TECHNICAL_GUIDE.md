@@ -1,17 +1,55 @@
-# Technical Guide - Land Acquisition Pipeline v3.0.0
+# Technical Guide - Land Acquisition Pipeline v3.1.0
 
-This document provides a technical overview of the `land_acquisition_pipeline.py` script.
+This document provides a technical overview of the `land_acquisition_pipeline.py` script with enhanced funnel analytics and executive KPIs.
 
 ## Core Functions
 
 ### `create_consolidated_excel_output()`
-This is the final function in the pipeline, responsible for generating the consolidated multi-sheet Excel report.
+This is the final function in the pipeline, responsible for generating the consolidated multi-sheet Excel report with enhanced funnel analytics.
 
-A key feature of this function is the generation of the **`Strategic_Mailing_List`**. This is created through a complex data aggregation process:
-1.  It first identifies all high-confidence mailing addresses for owners from the `df_all_validation_ready` DataFrame.
-2.  It creates a lookup map linking each owner's `cf` to their list of valid addresses.
-3.  It then groups the `df_all_raw` data by owner (`cf`) within each municipality to aggregate all parcels belonging to that owner.
-4.  Finally, it iterates through these groups, creating a row for each valid mailing address for each owner, and populates the row with the aggregated parcel information (`Foglio`, `Particella`, etc.). This produces the strategic, grouped output required for the campaign.
+**Enhanced Funnel Analysis Generation**:
+1. **Campaign-Level Aggregation**: Aggregates metrics from `df_campaign_summary` across all municipalities
+2. **Dual Funnel Creation**: Calls `create_funnel_analysis_df()` with aggregated data to generate dual funnel structure
+3. **Quality Distribution Analysis**: Creates `create_quality_distribution_df()` for automation metrics
+4. **Executive KPI Calculation**: Computes land efficiency, contact multiplication, and zero-touch processing rates
+
+**Strategic Mailing List Generation**:
+1. Identifies all high-confidence mailing addresses for owners from the `df_all_validation_ready` DataFrame
+2. Creates a lookup map linking each owner's `cf` to their list of valid addresses
+3. Groups the `df_all_raw` data by owner (`cf`) within each municipality to aggregate all parcels belonging to that owner
+4. Iterates through these groups, creating a row for each valid mailing address for each owner
+
+### `create_funnel_analysis_df()`
+**v3.1.0**: Creates enhanced dual funnel analysis with conversion rates and business intelligence.
+
+**Land Acquisition Pipeline (4 stages)**:
+1. **Input Parcels**: User-selected parcels for analysis
+2. **API Data Retrieved**: Parcels with successful ownership data retrieval
+3. **Private Owners Only**: Filtered to exclude company owners
+4. **Category A Filter**: Residential properties only
+
+**Contact Processing Pipeline (5 stages)**:
+1. **Owners Identified**: Unique owners from qualified parcels
+2. **Address Pairs Created**: Address expansion (multiple addresses per owner)
+3. **Geocoding Completed**: All addresses geocoded and quality assessed
+4. **Direct Mail Ready**: High confidence addresses for direct mailing
+5. **Agency Required**: Low confidence addresses requiring investigation
+
+Each stage includes conversion rates, retention rates, business rules, automation levels, and process notes.
+
+### `create_quality_distribution_df()`
+Analyzes address quality distribution with automation metrics:
+- **ULTRA_HIGH**: Zero-touch processing (17.4% typical)
+- **HIGH**: Quick review required
+- **MEDIUM**: Standard manual processing
+- **LOW**: Agency investigation required
+
+### `calculate_executive_kpis()`
+Computes executive-level KPIs from enhanced funnel data:
+- **Land Acquisition Efficiency**: % of input parcels retained (80% typical)
+- **Contact Multiplication Factor**: Addresses per qualified parcel (2.9x typical)
+- **Direct Mail Efficiency**: % of addresses ready for direct mail (52.2% typical)
+- **Zero-Touch Processing Rate**: % requiring no manual review (17.4% typical)
 
 ### `classify_address_quality_enhanced()`
 This function assesses the quality of a mailing address by comparing the original data with the results from the geocoding API. It analyzes street number similarity and the completeness of the geocoded data to assign a confidence score (`ULTRA_HIGH`, `HIGH`, `MEDIUM`, `LOW`) and a recommended `Routing_Channel` (`DIRECT_MAIL` or `AGENCY`).
@@ -20,11 +58,26 @@ This function assesses the quality of a mailing address by comparing the origina
 This helper function uses regular expressions to extract a street number from an address string. The patterns have been refined to be more conservative, now prioritizing numbers at the very end of a string or those explicitly marked with "n.". This prevents the logic from incorrectly extracting numbers that are part of a street's proper name (e.g., the "4" in "Via 4 Novembre").
 
 ## Output File Structure
-The script generates a single `.xlsx` file containing several sheets:
-- **`Strategic_Mailing_List`**: Grouped by input parcel, this sheet lists all owners and all their high-confidence addresses. Columns: `Municipality`, `Foglio`, `Particella`, `Parcels`, `Full_Name`, `Mailing_Address`.
-- **`All_Validation_Ready`**: Contains all individual owners of residential properties with detailed address analysis.
-- **`All_Companies_Found`**: Lists all company owners with their retrieved PEC emails.
-- **(other sheets remain as previously documented)**
+The script generates a single `.xlsx` file containing 10 enhanced sheets:
+
+### **Enhanced Analytics Sheets (v3.1.0)**
+- **`Enhanced_Funnel_Analysis`**: Dual funnel with conversion rates, business rules, and automation levels
+  - Columns: `Funnel_Type`, `Stage`, `Count`, `Hectares`, `Conversion_Rate`, `Retention_Rate`, `Business_Rule`, `Automation_Level`, `Process_Notes`, `CP`, `comune`, `provincia`
+- **`Address_Quality_Distribution`**: Quality analysis with automation metrics
+  - Columns: `Quality_Level`, `Count`, `Percentage`, `Processing_Type`, `Business_Value`, `Automation_Level`, `Routing_Decision`, `CP`, `comune`, `provincia`
+
+### **Primary Output Sheets**
+- **`Final_Mailing_List`**: Strategic mailing list grouped by input parcels with high-confidence addresses
+  - Columns: `Municipality`, `Foglio`, `Particella`, `Parcels`, `Full_Name`, `Mailing_Address`
+- **`All_Validation_Ready`**: Contains all individual owners of residential properties with detailed address analysis
+- **`All_Companies_Found`**: Lists all company owners with their retrieved PEC emails
+- **`Campaign_Summary`**: Business metrics by municipality with enhanced KPI integration
+- **`All_Raw_Data`**: Complete raw property owner data
+
+### **Analysis Sheets**
+- **`Owners_By_Parcel`**: Complete ownership per parcel (user-friendly format)
+- **`Owners_Normalized`**: Power BI ready ownership data
+- **`Campaign_Scorecard`**: High-level executive summary
 
 ## 📊 **Architecture Overview**
 
