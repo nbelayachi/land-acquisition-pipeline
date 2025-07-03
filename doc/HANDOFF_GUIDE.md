@@ -116,16 +116,28 @@ Based on project history, future work might involve:
 
 ### **Analysis Tools Available**
 - `simple_campaign_analyzer.py` - Current output verification
-- Backup files available with `_backup_` timestamp
+- `dev_tools/funnel_analysis/` - Funnel analysis tools
+- `dev_tools/testing/` - Test scripts and validation
+- `dev_tools/archive/` - Historical development files
 - Previous working states documented in changelog
 
 ## 🚀 **Getting Started as New Agent**
 
+### **MANDATORY FIRST STEPS**
 1. **Read README.md** - Understand current capabilities
 2. **Review CHANGELOG.md** - See what's been fixed
-3. **Run test campaign** - Verify everything works
-4. **Check verification results** - Ensure all 5 sheets proper
-5. **Ask user for specific requirements** - Don't assume what needs work
+3. **📋 READ PROJECT_MAINTENANCE_GUIDE.md** - ESSENTIAL for all agents
+4. **📋 READ AGENT_CONVERSATION_TEMPLATES.md** - Required conversation patterns
+5. **Run test campaign** - Verify everything works
+6. **Check verification results** - Ensure all 10 sheets proper
+7. **Ask user for specific requirements** - Don't assume what needs work
+
+### **⚠️ CRITICAL REQUIREMENT**
+**Every agent MUST follow the maintenance protocols in PROJECT_MAINTENANCE_GUIDE.md**
+- Always prompt for documentation updates after changes
+- Always check file organization and archive outdated files  
+- Always verify version consistency
+- Always leave project better organized than found
 
 ---
 

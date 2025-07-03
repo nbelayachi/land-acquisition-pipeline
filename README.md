@@ -102,7 +102,9 @@ land-acquisition-pipeline/
 │   ├── testing/                  ← Test scripts and validation
 │   ├── reference/                ← Reference implementations
 │   ├── prototypes/               ← Development prototypes
-│   └── test-data/                ← Test Excel files
+│   ├── funnel_analysis/          ← Funnel analysis tools
+│   ├── test-data/                ← Test Excel files
+│   └── archive/                  ← Historical development files
 ├── completed_campaigns/          ← Campaign output directory
 ├── outputs/                      ← Analysis results and data
 ├── logs/                         ← Pipeline execution logs
@@ -148,6 +150,9 @@ Edit `land_acquisition_config.json`:
 ## 📞 **Support**
 
 - **Documentation**: See `doc/` folder for detailed guides
+- **New Agent Guide**: See `doc/HANDOFF_GUIDE.md`
+- **Maintenance Guide**: See `doc/PROJECT_MAINTENANCE_GUIDE.md` (ESSENTIAL)
+- **Conversation Templates**: See `doc/AGENT_CONVERSATION_TEMPLATES.md`
 - **Logs**: Check `logs/land_acquisition_pipeline_[timestamp].log`
 - **Version History**: See `doc/CHANGELOG.md`
 
