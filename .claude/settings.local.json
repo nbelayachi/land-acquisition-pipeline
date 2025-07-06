@@ -6,7 +6,10 @@
       "Bash(find:*)",
       "Bash(mkdir:*)",
       "Bash(rg:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(true)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

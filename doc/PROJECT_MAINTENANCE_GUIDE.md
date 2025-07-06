@@ -47,12 +47,16 @@ Should I proceed with this full maintenance approach?"
 ### **Step 3: Post-Implementation Maintenance**
 Execute this checklist EVERY TIME:
 
-#### **Documentation Updates**
-- [ ] Update README.md if features/structure changed
+#### **Documentation Updates (3 Core Documents)**
+- [ ] Update BUSINESS_CONTEXT.md if business process/metrics changed
+- [ ] Update CURRENT_STATUS.md with new capabilities/issues
+- [ ] Update TECHNICAL_REFERENCE.md if functions/outputs changed
 - [ ] Add CHANGELOG.md entry for significant changes
-- [ ] Update HANDOFF_GUIDE.md with new function locations
-- [ ] Update TECHNICAL_GUIDE.md with new technical details
-- [ ] Update PROJECT_STATUS document
+- [ ] Update README.md if core capabilities changed
+- [ ] Create/Update METRICS_GUIDE.md with detailed metric explanations and business rationale.
+
+#### **Testing and Validation**
+- [ ] Run `dev_tools/testing/validate_campaign_metrics.py` with a recent campaign output to verify metric accuracy and consistency.
 
 #### **File Organization**
 - [ ] Check dev_tools/ for new files that should be categorized
@@ -117,10 +121,11 @@ doc/
 Every agent must execute this checklist:
 
 #### **Documentation Currency Check**
-- [ ] README.md reflects current state
+- [ ] BUSINESS_CONTEXT.md reflects current business process
+- [ ] CURRENT_STATUS.md shows accurate system state
+- [ ] TECHNICAL_REFERENCE.md has latest function details
+- [ ] README.md reflects current capabilities
 - [ ] CHANGELOG.md has latest changes
-- [ ] HANDOFF_GUIDE.md mentions new functions/changes
-- [ ] All project-status/ documents are current
 
 #### **File Organization Audit**
 - [ ] Root directory only contains essential files
@@ -204,6 +209,9 @@ This ensures new agents can immediately understand the current state."
 - New functions not documented in guides
 - Backup files in main directories
 - Duplicate test scripts
+- **Missing debugging documentation** when new error handling is added
+- **Outdated artifact descriptions** when new CSV/Excel outputs are created
+- **Undocumented fixes** when pipeline issues are resolved
 
 ---
 

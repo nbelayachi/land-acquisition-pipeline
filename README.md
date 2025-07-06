@@ -1,8 +1,8 @@
-# 🏠 Land Acquisition Pipeline v3.1.0
+# 🏠 Land Acquisition Pipeline v3.1.6
 
 **Status**: ✅ **PRODUCTION READY** - Enhanced funnel metrics with executive KPIs
-**Last Updated**: July 2, 2025
-**Version**: 3.1.0 (Enhanced Funnel Analytics + Business Intelligence)
+**Last Updated**: July 6, 2025
+**Version**: 3.1.6 (Enhanced Funnel Analytics + Business Intelligence + Modernized Interface)
 
 ## 📋 **What This Does**
 
@@ -11,6 +11,9 @@ Automated Python CLI tool that processes Italian land registry data to identify 
 **Input**: Excel file with property parcels  
 **Output**: Single consolidated Excel file with enhanced analytics and quality distribution  
 **Key Features**: Enhanced funnel analysis, conversion rates, zero-touch processing metrics, address quality intelligence, executive KPIs
+
+## 📖 **For Developers/Agents**
+**New to this project?** Read `doc/BUSINESS_CONTEXT.md` first for complete business context about the renewable energy company, land acquisition workflow, and stakeholder requirements.
 
 ## 🚀 **Quick Start**
 
@@ -22,15 +25,17 @@ Automated Python CLI tool that processes Italian land registry data to identify 
 ### Run a Campaign
 ```bash
 python campaign_launcher.py
-# Select your input Excel file
-# Follow prompts to launch campaign
+# Streamlined interface: select input file, review analysis, confirm launch
+# Generates configuration automatically
+python land_acquisition_pipeline.py
+# Executes the campaign using latest configuration
 ```
 
-### Output Structure (v3.1.0)
-Single file: `[Campaign_Name]_Results.xlsx` with 10 enhanced sheets:
-- **Final_Mailing_List**: Strategic mailing list grouped by parcels with high-confidence addresses
-- **🆕 Enhanced_Funnel_Analysis**: Dual funnel with conversion rates and business intelligence
-- **🆕 Address_Quality_Distribution**: Quality analysis with automation metrics and routing decisions
+### Output Structure (v3.1.5)
+Single file: `[Campaign_Name]_Results.xlsx` with 10 enhanced sheets + PowerBI export:
+- **Final_Mailing_List**: Strategic mailing list with owner grouping, sequence numbers, and enhanced usability (v3.1.5)
+- **🆕 Enhanced_Funnel_Analysis**: Dual funnel with conversion rates and business intelligence ✅ Working
+- **🆕 Address_Quality_Distribution**: Quality analysis with automation metrics and routing decisions ✅ Working
 - **All_Validation_Ready**: Processed contacts ready for outreach
 - **All_Raw_Data**: Complete raw property owner data
 - **All_Companies_Found**: Company owners with PEC emails
@@ -38,10 +43,21 @@ Single file: `[Campaign_Name]_Results.xlsx` with 10 enhanced sheets:
 - **Owners_By_Parcel**: Complete ownership per parcel (user-friendly)
 - **Owners_Normalized**: Power BI ready ownership data
 - **Campaign_Scorecard**: High-level executive summary
+- **🆕 PowerBI_Dataset.csv**: Business intelligence export for dashboards ✅ Working
 
-## 📊 **Current Status (v3.1.0)**
+## 📊 **Current Status (v3.1.6)**
 
-### 🆕 **New in v3.1.0**
+### 🆕 **New in v3.1.6**
+- **Modernized Campaign Launcher**: Completely rewritten interface (57% code reduction) with current v3.1.5 features
+- **Documentation Reconciliation**: All documents updated for version consistency and broken references fixed
+- **Streamlined User Experience**: Simplified workflow with clear status indicators and accurate output descriptions
+
+### **Recent Features (v3.1.5)**
+- **Enhanced `Final_Mailing_List` Structure**: Improved usability with `cf`, `Addresses_Per_Owner`, and `Address_Sequence` columns, sorted by owner
+- **Refined Address Classification**: Better confidence logic elevating reliable addresses to higher confidence levels
+- **Metrics Clarity Enhancement**: Business-friendly labels and comprehensive metrics documentation
+
+### **Core Features (v3.1.0-v3.1.4)**
 - **Enhanced Funnel Analysis**: Dual funnel structure (Land Acquisition + Contact Processing) with conversion rates between all stages
 - **Executive KPI Calculations**: Land efficiency (80%), contact multiplication (2.9x), zero-touch processing (17.4%), direct mail efficiency (52.2%)
 - **Address Quality Distribution**: Automation metrics with business value classification (ULTRA_HIGH, HIGH, MEDIUM, LOW)
@@ -57,9 +73,11 @@ Single file: `[Campaign_Name]_Results.xlsx` with 10 enhanced sheets:
 - **Single Consolidated Output**: One Excel file per campaign with enhanced analytics
 - **Complete Funnel Tracking**: Dual funnel analysis with business insights
 - **Address Quality Intelligence**: Smart routing (DIRECT_MAIL vs AGENCY) with automation metrics
+- **PowerBI Integration**: CSV export for dashboard creation and business intelligence
 - **PEC Email Integration**: Automatic company email lookup
 - **Geocoding Enhancement**: ZIP codes and coordinates
 - **Complete Traceability**: CP/comune/provincia columns in all sheets
+- **🆕 Enhanced Error Handling**: Comprehensive debugging and graceful degradation
 
 ### 🆕 **New in v2.9.7**
 - **Owners_By_Parcel Sheet**: User-friendly view with up to 10 owners per parcel
@@ -95,9 +113,9 @@ land-acquisition-pipeline/
 ├── land_acquisition_config.json  ← Configuration
 ├── doc/
 │   ├── CHANGELOG.md              ← Version history
-│   ├── HANDOFF_GUIDE.md          ← For new agents
-│   ├── TECHNICAL_GUIDE.md        ← Detailed technical docs
-│   └── project-status/           ← Implementation status docs
+│   ├── AGENT_ONBOARDING_PROMPT.md ← For new agents
+│   ├── TECHNICAL_REFERENCE.md    ← Detailed technical docs
+│   └── archive/                  ← Historical documentation
 ├── dev_tools/
 │   ├── testing/                  ← Test scripts and validation
 │   ├── reference/                ← Reference implementations
@@ -131,7 +149,14 @@ Edit `land_acquisition_config.json`:
     "enabled": true,
     "include_conversion_rates": true,
     "calculate_executive_kpis": true,
-    "include_quality_distribution": true
+    "include_quality_distribution": true,
+    "track_zero_touch_processing": true
+  },
+  "powerbi_integration": {
+    "enabled": true,
+    "auto_export_data": true,
+    "export_format": "csv",
+    "export_filename": "PowerBI_Dataset.csv"
   }
 }
 ```
@@ -142,19 +167,26 @@ Edit `land_acquisition_config.json`:
 - **Missing API tokens**: Check `land_acquisition_config.json`
 - **Empty results**: Verify Sezione data for certain municipalities
 - **Timeout errors**: Use built-in recovery system (automatic)
+- **Enhanced features not generating**: Check debug output in console and logs
+- **PowerBI CSV not created**: Ensure powerbi_integration.enabled is true in config
 
 **Analysis Tools:**
 - `simple_campaign_analyzer.py` - Verify output structure
 - Check logs in `logs/` directory
+- **🆕 Enhanced Debug Output**: Comprehensive error handling with DataFrame inspection
 
-## 📞 **Support**
+## 📞 **Documentation**
 
-- **Documentation**: See `doc/` folder for detailed guides
-- **New Agent Guide**: See `doc/HANDOFF_GUIDE.md`
-- **Maintenance Guide**: See `doc/PROJECT_MAINTENANCE_GUIDE.md` (ESSENTIAL)
-- **Conversation Templates**: See `doc/AGENT_CONVERSATION_TEMPLATES.md`
-- **Logs**: Check `logs/land_acquisition_pipeline_[timestamp].log`
-- **Version History**: See `doc/CHANGELOG.md`
+### **Essential Documents (Read These)**
+- **Business Context**: `doc/BUSINESS_CONTEXT.md` - Complete business workflow and stakeholder context
+- **Current Status**: `doc/CURRENT_STATUS.md` - What's working, what's broken, current priorities  
+- **Technical Reference**: `doc/TECHNICAL_REFERENCE.md` - Implementation details and function guide
+- **Maintenance Guide**: `doc/PROJECT_MAINTENANCE_GUIDE.md` - Mandatory update protocols
+
+### **Additional Resources**
+- **Version History**: `doc/CHANGELOG.md`
+- **System Logs**: `logs/land_acquisition_pipeline_[timestamp].log`
+- **Enhanced Features**: `doc/POWERBI_ENHANCEMENT_NOTES.md`
 
 ---
 **🎯 Ready for production use. Enhanced funnel analytics with executive KPIs validated and tested. All v3.1.0 features mathematically verified.**

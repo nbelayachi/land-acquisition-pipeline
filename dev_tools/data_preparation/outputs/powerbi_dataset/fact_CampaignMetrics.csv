@@ -1,0 +1,6 @@
+municipality_id,comune,provincia,Input_Parcels,Property_Data_Retrieved_Rate,Individual_Landowners_Found,Unique_Company_Owners,Interpolation_Risks_Detected,Hectares_Direct_Mail,Companies_With_PEC,Unique_Owners_on_Target_Parcels,PEC_Success_Rate,Residential_Viability_Rate,Address_Verification_Rate,Input_Area_Ha,After_API_Parcels,After_API_Area_Ha,Private_Owner_Parcels,Private_Owner_Area_Ha,Company_Owner_Parcels,Company_Owner_Area_Ha,Residential_Contact_ParcelsResidential_Contact_Parcels,After_CatA_Filter_Area_Ha,Unique_Owner_Address_Pairs,Direct_Mail_Final_Contacts,Direct_Mail_Final_Area_Ha,Agency_Final_Contacts,Agency_Final_Area_Ha
+Casalpusterlengo,Casalpusterlengo,,2,100,1,0,2,0.0,0,1,0,50.0,100,10.82,2,10.82,2,10.82,0,0,2,10.82,6,0,0.0,6,10.82
+Casalpusterlengo,Ospedaletto Lodigiano,,3,100,2,0,0,33.67,0,2,0,33.33333333333333,100,33.67,3,33.67,3,33.67,0,0,3,33.67,8,4,33.67,4,24.67
+Castiglione,Carpenedolo,,2,100,6,0,6,5.529999999999999,0,6,0,50.0,100,5.529999999999999,2,5.529999999999999,2,5.529999999999999,0,0,2,5.529999999999999,6,6,5.529999999999999,0,0.0
+Castiglione,Castiglione Delle Stiviere,,1,100,1,0,0,0.0,0,0,0,0.0,0,1.61,1,1.61,1,1.61,0,0,0,0.0,0,0,0.0,0,0.0
+Castiglione,Montichiari,,2,100,3,0,0,2.96,0,1,0,100.0,100,5.31,2,5.31,2,5.31,0,0,1,2.96,3,2,2.96,1,2.96

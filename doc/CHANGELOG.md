@@ -2,30 +2,137 @@
 
 # Changelog
 
-## [3.1.0] - 2025-07-02 🚀 ENHANCED FUNNEL METRICS & EXECUTIVE KPIs
+## [3.1.6] - 2025-07-06 🚀 MODERNIZED CAMPAIGN LAUNCHER + DOCUMENTATION RECONCILIATION
+
+### ✨ **Major Updates**
+- **Completely Modernized Campaign Launcher**: Streamlined interface updated to v3.1.5 standards
+  - **Reduced Complexity**: From 669 lines to 285 lines (57% reduction) for better maintainability
+  - **Current Feature Set**: Updated to reflect all v3.1.0-v3.1.5 features including enhanced funnel analytics, address quality intelligence, and Final_Mailing_List improvements
+  - **Improved User Experience**: Simplified workflow with clear status indicators and concise output descriptions
+  - **Removed Outdated Elements**: Eliminated v2.9 references, old OneDrive structure, and verbose geocoding checks
+
+### 🔧 **Technical Implementation**
+- **Class Modernization**: Renamed to `LandAcquisitionCampaignLauncher` with version tracking
+- **Configuration Integration**: Proper integration with current v3.1.5 configuration structure
+- **Streamlined Analysis**: Quick input file validation with essential metrics only
+- **Current Output Structure**: Accurately describes single consolidated Excel file with 10 sheets
+
+### 📚 **Documentation Reconciliation**
+- **Version Consistency**: Updated all documents to reflect v3.1.5 consistently
+- **Broken References Fixed**: Corrected README.md references to archived files
+- **Date Harmonization**: Aligned all documentation timestamps
+- **Organization Validation**: Updated PROJECT_ORGANIZATION_COMPLETE.md to reflect actual file structure
+
+### 📊 **Business Impact**
+- **Faster Campaign Setup**: Reduced interface complexity enables quicker campaign launches
+- **Accurate Expectations**: Users now see correct v3.1.5 output descriptions
+- **Current Feature Awareness**: All latest capabilities properly highlighted
+- **Professional Documentation**: Complete consistency across all project documents
+
+---
+
+## [3.1.5] - 2025-07-04 📬 USABILITY ENHANCEMENT
+
+### ✨ **Major Features**
+- **Enhanced `Final_Mailing_List` Structure**: The `Final_Mailing_List` sheet has been significantly improved for usability by the land acquisition team.
+  - **New Columns**: Added `cf` (fiscal code), `Addresses_Per_Owner`, and `Address_Sequence` to provide clear, at-a-glance information about each owner's contact points.
+  - **Owner-Based Sorting**: The entire sheet is now sorted by the owner's fiscal code (`cf`), grouping all addresses for a single owner together.
+
+### 🔧 **Technical Implementation**
+- Modified the `create_final_mailing_list` function to include the new columns and apply the sorting logic.
+
+### 📊 **Business Impact**
+- **Improved Mailing Efficiency**: The new structure makes it significantly easier and faster for the mailing team to process the list, consolidate communications for owners with multiple properties, and avoid confusion.
+- **Enhanced Clarity**: The `Addresses_Per_Owner` and `Address_Sequence` columns provide immediate context, reducing the need for manual cross-referencing and potential errors.
+- **No Impact on Core Metrics**: This is a usability enhancement and does not change any of the core metric calculations in the `Enhanced_Funnel_Analysis` or `Campaign_Summary` sheets.
+
+---
+
+## [3.1.4] - 2025-07-04 🎯 ADDRESS CLASSIFICATION REFINEMENT
+
+### ✨ **Major Features**
+- **Refined Address Confidence Logic**: The `classify_address_quality_enhanced` function has been updated to be more aligned with business needs. Certain addresses previously classified as `MEDIUM` confidence are now elevated to `HIGH` confidence if they are considered deliverable, even with minor geocoding discrepancies. This primarily affects addresses where the original input address is deemed reliable by the business.
+
+### 🔧 **Technical Implementation**
+- Modified the `classify_address_quality_enhanced` function to incorporate the new business logic for elevating address confidence.
+
+### 📊 **Business Impact**
+- **Increased Mailing List Size**: This change will result in a larger pool of `HIGH` confidence addresses, increasing the number of contacts in the `Final_Mailing_List` that can be processed automatically.
+- **Reduced Manual Review**: By automatically elevating the confidence of reliable addresses, the need for manual review of certain `MEDIUM` confidence addresses is reduced, saving time and effort.
+
+---
+
+## [3.1.3] - 2025-07-03 📈 ENHANCED METRICS CLARITY & COMPREHENSIVE GUIDE
+
+### ✨ **Major Features**
+- **Refined Contact Processing Funnel Metrics**: The `Retention_Rate` for stages within the "Contact Processing" funnel (e.g., "Address Expansion", "Direct Mail Ready") is now strictly calculated relative to the "1. Owner Discovery" count, providing a consistent and business-sensible view of overall contact retention.
+- **New Metric: `Stage_Conversion_Rate`**: Introduced a new column in `Enhanced_Funnel_Analysis` to explicitly show the conversion rate from the *immediately preceding relevant stage*. This provides granular insight into step-wise efficiency without confusing overall retention.
+- **Comprehensive Metrics Guide (`METRICS_GUIDE.md`)**: Created a new, detailed documentation file explaining every metric across `Enhanced_Funnel_Analysis`, `Address_Quality_Distribution`, and `Campaign_Summary`. Each metric includes its business rationale, calculation details, and real-world examples from a sample campaign.
+
+### 🔧 **Technical Implementation**
+- Modified `create_funnel_analysis_df` function to implement the new `Retention_Rate` and `Stage_Conversion_Rate` calculations for the Contact Processing Funnel.
+- Created `doc/METRICS_GUIDE.md` as a central reference for all pipeline metrics.
+
+### 📊 **Business Impact**
+- **Unambiguous Metric Interpretation**: Eliminates confusion around `Retention_Rate` in the Contact Processing funnel, providing clearer insights into contact flow and efficiency.
+- **Enhanced Granular Analysis**: The `Stage_Conversion_Rate` allows for precise identification of bottlenecks and optimization opportunities at each step of the contact processing.
+- **Improved Stakeholder Understanding**: The `METRICS_GUIDE.md` serves as a single source of truth for all metrics, empowering business users to fully understand and leverage the pipeline's output for strategic decision-making.
+
+---
+
+## [3.1.1] - 2025-07-03 📊 METRICS CLARITY & ACCURACY FIXES
+
+### ✨ **Major Features**
+- **Business-Friendly Funnel**: Renamed technical stage names in `Enhanced_Funnel_Analysis` to be clear and intuitive for business stakeholders (e.g., "Category A Filter" is now "Parcels w/ Residential Buildings").
+- **Multiplier Metrics**: Changed "Owner Discovery" and "Address Expansion" rates from percentages to multipliers (e.g., 1.25x) to accurately reflect data enrichment instead of conversion.
+- **Enhanced Process Notes**: Added detailed, business-focused explanations to each stage of the funnel, clarifying the purpose and impact of each step.
+
+### 🔧 **Bug Fixes**
+- **Corrected Percentage Rounding**: Fixed the rounding logic in the `Address_Quality_Distribution` sheet to ensure the total always sums to exactly 100.0%, preventing presentation errors in reports.
+
+### 📊 **Business Impact**
+- **Improved Stakeholder Communication**: Funnel metrics are now significantly clearer and easier for non-technical audiences to understand, reducing confusion and improving decision-making.
+- **Accurate Reporting**: Corrected rounding ensures that all quality distribution reports are mathematically accurate and professional.
+- **Enhanced Data Storytelling**: The improved labels and notes allow the data to tell a more coherent story about the land acquisition process.
+
+---
+
+## [3.1.0] - 2025-07-03 🚀 ENHANCED FUNNEL METRICS & EXECUTIVE KPIs + POWERBI INTEGRATION
 
 ### ✨ **Major Features**
 - **Enhanced Funnel Analysis**: Comprehensive dual funnel structure (Land Acquisition + Contact Processing) with conversion rates between all pipeline stages
 - **Executive KPI Dashboard**: Automated calculation of Land Acquisition Efficiency (80%), Contact Multiplication Factor (2.9x), Zero-Touch Processing Rate (17.4%), and Direct Mail Efficiency (52.2%)
 - **Address Quality Distribution**: Business intelligence analysis with automation metrics and routing decisions for ULTRA_HIGH, HIGH, MEDIUM, and LOW confidence levels
 - **Business Rule Documentation**: Complete process transparency with automation levels and business value classification
+- **🆕 PowerBI CSV Export**: Generates PowerBI_Dataset.csv for dashboard integration and business intelligence
 
 ### 🔧 **Technical Implementation**
 - **Campaign-Level Aggregation**: Fixed funnel creation to properly aggregate metrics across municipalities instead of concatenating individual funnels
 - **Enhanced Excel Output**: New sheets `Enhanced_Funnel_Analysis` and `Address_Quality_Distribution` with comprehensive business intelligence
 - **Mathematical Validation**: All conversion rates validated to ensure ≤ 100% with proper business logic
 - **Configuration Enhancement**: Added `enhanced_funnel_analysis` configuration section with granular control
+- **🆕 Enhanced Error Handling**: Comprehensive debugging with detailed error output and DataFrame inspection (lines 2222-2256)
+- **🆕 PowerBI Export Function**: Alternative data source implementation reading from consolidated Excel data for reliability
+
+### 🔧 **Bug Fixes (v3.1.0)**
+- **Fixed Enhanced Features Generation**: Added comprehensive error handling and debug output for Enhanced_Funnel_Analysis and Address_Quality_Distribution sheets
+- **Restored PowerBI CSV Generation**: Fixed PowerBI_Dataset.csv export functionality that was commented out
+- **Alternative Data Source**: Created `create_powerbi_export_from_consolidated_data()` function to read from Excel data when campaign_stats unavailable
+- **Enhanced Debugging**: Added detailed DataFrame inspection and execution flow tracking
 
 ### 📊 **Business Impact**
 - **Process Optimization**: Quantifies automation opportunities with 17.4% zero-touch processing capability
 - **Executive Reporting**: Provides C-level KPIs for land acquisition campaign performance
 - **Quality Intelligence**: Enables data-driven decisions on contact routing and resource allocation
 - **Operational Efficiency**: Tracks conversion rates through entire pipeline for bottleneck identification
+- **🆕 Dashboard Integration**: PowerBI export enables real-time business intelligence dashboards
 
 ### 🧪 **Quality Assurance**
 - **Real Campaign Validation**: Tested against actual campaign data with mathematical consistency verification
 - **Unit Test Suite**: Comprehensive test coverage for all enhanced funnel functions
 - **Data Consistency**: Verified alignment between Campaign Summary and Enhanced Funnel metrics
+- **🆕 Enhanced Features Verified**: Confirmed Enhanced_Funnel_Analysis (9 rows) and Address_Quality_Distribution (4 rows) generation
+- **🆕 PowerBI Export Verified**: Confirmed PowerBI_Dataset.csv generation with municipality-level metrics
 
 ---
 

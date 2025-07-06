@@ -602,6 +602,11 @@ class IntegratedLandAcquisitionPipeline:
     
     def create_powerbi_export(self, campaign_name, campaign_dir):
         """Create Power BI export data with ENHANCED business intelligence metrics and funnel data"""
+        print(f"🔍 DEBUG: PowerBI export called - Campaign: {campaign_name}")
+        print(f"  Campaign dir: {campaign_dir}")
+        print(f"  Campaign stats available: {bool(self.campaign_stats)}")
+        print(f"  Municipalities processed: {len(self.campaign_stats.get('municipalities_processed', {}))}")
+        
         powerbi_data = []
         
         for municipality_key, stats in self.campaign_stats.get('municipalities_processed', {}).items():
@@ -615,8 +620,8 @@ class IntegratedLandAcquisitionPipeline:
 
                 # Existing metrics
                 "Input_Parcels": summary_metrics.get("Input_Parcels", 0),
-                "API_Success_Rate": summary_metrics.get("API_Success_Rate", 0.0),
-                "Unique_Individual_Owners": summary_metrics.get("Unique_Individual_Owners", 0),
+                "Property_Data_Retrieved_Rate": summary_metrics.get("Property_Data_Retrieved_Rate", 0.0),
+                "Individual_Landowners_Found": summary_metrics.get("Individual_Landowners_Found", 0),
                 "Unique_Company_Owners": summary_metrics.get("Unique_Company_Owners", 0),
                 # REVISED v2.9.2
                 "Unique_Owner_Address_Pairs": summary_metrics.get("Unique_Owner_Address_Pairs", 0),
@@ -638,6 +643,77 @@ class IntegratedLandAcquisitionPipeline:
             powerbi_file = os.path.join(campaign_dir, "PowerBI_Dataset.csv")
             powerbi_df.to_csv(powerbi_file, index=False, encoding='utf-8-sig')
             print(f"   📊 Power BI dataset created with enhanced metrics and funnel data: {os.path.basename(powerbi_file)}")
+            print(f"       Shape: {powerbi_df.shape}, Municipalities: {len(powerbi_data)}")
+        else:
+            print(f"   ❌ Power BI dataset: No data available for export")
+
+    def create_powerbi_export_from_consolidated_data(self, campaign_name, campaign_dir):
+        """Create PowerBI CSV from consolidated Excel data (more reliable than campaign_stats)"""
+        print(f"🔍 DEBUG: Creating PowerBI export from consolidated Excel data")
+        
+        # Read from the consolidated Excel file
+        output_file = os.path.join(campaign_dir, f"{campaign_name}_Results.xlsx")
+        
+        if not os.path.exists(output_file):
+            print(f"❌ Excel file not found: {output_file}")
+            return
+        
+        try:
+            # Read Campaign_Summary sheet
+            df_summary = pd.read_excel(output_file, sheet_name='Campaign_Summary')
+            print(f"  Campaign Summary loaded: {df_summary.shape}")
+            
+            powerbi_data = []
+            
+            for index, row in df_summary.iterrows():
+                # Create PowerBI record from Campaign_Summary data
+                record = {
+                    # Campaign metadata
+                    "Campaign_Date": datetime.now().strftime("%Y-%m-%d"),
+                    "Campaign_Name": campaign_name,
+                    "Municipality_Key": f"{row['CP']}_{row['comune'].replace(' ', '_')}",
+                    "CP": row['CP'],
+                    "Municipality": row['comune'],
+                    
+                    # Core metrics from Campaign_Summary
+                    "Input_Parcels": int(row['Input_Parcels']) if pd.notna(row['Input_Parcels']) else 0,
+                    "Total_Area_Ha": float(row['Input_Area_Ha']) if pd.notna(row['Input_Area_Ha']) else 0.0,
+                    "Property_Data_Retrieved_Rate": float(row['Property_Data_Retrieved_Rate']) if pd.notna(row['Property_Data_Retrieved_Rate']) else 0.0,
+                    "Individual_Landowners_Found": int(row['Individual_Landowners_Found']) if pd.notna(row['Individual_Landowners_Found']) else 0,
+                    "Unique_Company_Owners": int(row['Unique_Company_Owners']) if pd.notna(row['Unique_Company_Owners']) else 0,
+                    "Unique_Owner_Address_Pairs": int(row['Unique_Owner_Address_Pairs']) if pd.notna(row['Unique_Owner_Address_Pairs']) else 0,
+                    "Direct_Mail_Final_Contacts": int(row['Direct_Mail_Final_Contacts']) if pd.notna(row['Direct_Mail_Final_Contacts']) else 0,
+                    "Agency_Final_Contacts": int(row['Agency_Final_Contacts']) if pd.notna(row['Agency_Final_Contacts']) else 0,
+                    "Direct_Mail_Final_Area_Ha": float(row['Direct_Mail_Final_Area_Ha']) if pd.notna(row['Direct_Mail_Final_Area_Ha']) else 0.0,
+                    "Agency_Final_Area_Ha": float(row['Agency_Final_Area_Ha']) if pd.notna(row['Agency_Final_Area_Ha']) else 0.0,
+                    
+                    # Calculated business metrics
+                    "Total_Final_Contacts": (int(row['Direct_Mail_Final_Contacts']) if pd.notna(row['Direct_Mail_Final_Contacts']) else 0) + (int(row['Agency_Final_Contacts']) if pd.notna(row['Agency_Final_Contacts']) else 0),
+                    "Direct_Mail_Percentage": round((float(row['Direct_Mail_Final_Contacts']) / (float(row['Direct_Mail_Final_Contacts']) + float(row['Agency_Final_Contacts'])) * 100), 1) if (pd.notna(row['Direct_Mail_Final_Contacts']) and pd.notna(row['Agency_Final_Contacts']) and (float(row['Direct_Mail_Final_Contacts']) + float(row['Agency_Final_Contacts'])) > 0) else 0.0,
+                    
+                    # Additional metrics if available
+                    "Residential_Viability_Rate": float(row.get('Residential_Viability_Rate', 0)) if pd.notna(row.get('Residential_Viability_Rate', 0)) else 0.0,
+                    "Address_Verification_Rate": float(row.get('Address_Verification_Rate', 0)) if pd.notna(row.get('Address_Verification_Rate', 0)) else 0.0,
+                    "Interpolation_Risks_Detected": int(row.get('Interpolation_Risks_Detected', 0)) if pd.notna(row.get('Interpolation_Risks_Detected', 0)) else 0,
+                    "Companies_With_PEC": int(row.get('Companies_With_PEC', 0)) if pd.notna(row.get('Companies_With_PEC', 0)) else 0,
+                    "PEC_Success_Rate": float(row.get('PEC_Success_Rate', 0)) if pd.notna(row.get('PEC_Success_Rate', 0)) else 0.0
+                }
+                powerbi_data.append(record)
+            
+            if powerbi_data:
+                # Create DataFrame and export
+                powerbi_df = pd.DataFrame(powerbi_data)
+                powerbi_file = os.path.join(campaign_dir, "PowerBI_Dataset.csv")
+                powerbi_df.to_csv(powerbi_file, index=False, encoding='utf-8-sig')
+                print(f"   📊 PowerBI dataset created from Excel data: {os.path.basename(powerbi_file)}")
+                print(f"       Shape: {powerbi_df.shape}, Municipalities: {len(powerbi_data)}")
+            else:
+                print(f"   ❌ No data processed for PowerBI export")
+                
+        except Exception as e:
+            print(f"❌ Error creating PowerBI export: {str(e)}")
+            import traceback
+            traceback.print_exc()
 
     def is_province_match(self, original_address, geocoded_province_code):
         """v2.9.1: Helper function to check if geocoded province matches original."""
@@ -877,12 +953,15 @@ class IntegratedLandAcquisitionPipeline:
         
         # Original has number, geocoding failed to provide one
         elif original_num and not geocoded_num:
+            # If original has a number and geocoding couldn't provide one,
+            # but the original is still considered reliable for direct mail (e.g., Montichiari case)
+            # We elevate its confidence to HIGH.
             return {
-                'Address_Confidence': 'MEDIUM',
+                'Address_Confidence': 'HIGH', # Elevated to HIGH
                 'Interpolation_Risk': False,
                 'Best_Address': original,
                 'Routing_Channel': 'DIRECT_MAIL',
-                'Quality_Notes': f'Original has number "{original_num}" but geocoding could not verify',
+                'Quality_Notes': f'Original has number "{original_num}" and is considered deliverable despite geocoding not providing a number.',
                 'Classification_Method': 'enhanced'
             }
         
@@ -968,7 +1047,27 @@ class IntegratedLandAcquisitionPipeline:
             return {'Address_Confidence': 'HIGH', 'Interpolation_Risk': False, 'Best_Address': geocoded, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': 'Complete and verified address', 'Classification_Method': 'original'}
         
         elif original_num and geocoded_num and original_num != geocoded_num:
-            return {'Address_Confidence': 'MEDIUM', 'Interpolation_Risk': True, 'Best_Address': original, 'Routing_Channel': 'DIRECT_MAIL', 'Quality_Notes': f'Number mismatch. Using original number "{original_num}" instead of geocoded "{geocoded_num}"', 'Classification_Method': 'original'}
+            # If there's a number mismatch but the original address is still preferred and routed for DIRECT_MAIL,
+            # we elevate its confidence to HIGH.
+            if row.get('Best_Address') == original and row.get('Routing_Channel') == 'DIRECT_MAIL':
+                return {
+                    'Address_Confidence': 'HIGH', # Elevated to HIGH
+                    'Interpolation_Risk': True, # Still has interpolation risk due to mismatch
+                    'Best_Address': original,
+                    'Routing_Channel': 'DIRECT_MAIL',
+                    'Quality_Notes': f'Number mismatch, but original preferred and routed for direct mail: {similarity["reason"]}',
+                    'Classification_Method': 'enhanced'
+                }
+            else:
+                # Otherwise, keep it as MEDIUM or LOW based on other factors
+                return {
+                    'Address_Confidence': 'MEDIUM',
+                    'Interpolation_Risk': True,
+                    'Best_Address': original,
+                    'Routing_Channel': 'DIRECT_MAIL',
+                    'Quality_Notes': f'Number mismatch. Using original number "{original_num}" instead of geocoded "{geocoded_num}"',
+                    'Classification_Method': 'enhanced'
+                }
         
         elif not original_num and geocoded_num:
             return {'Address_Confidence': 'LOW', 'Interpolation_Risk': True, 'Best_Address': '', 'Routing_Channel': 'AGENCY', 'Quality_Notes': 'Address has no number, geocoding API suggested one', 'Classification_Method': 'original'}
@@ -1108,15 +1207,15 @@ Best,
         company_cfs = df_raw[df_raw['cf'].str[0].str.isdigit()]['cf'].unique()
         
         parcels_with_data = len(df_raw[['foglio_input', 'particella_input']].drop_duplicates())
-        api_success_rate = (parcels_with_data / municipality_data['parcel_count']) * 100 if municipality_data['parcel_count'] > 0 else 0
+        Property_Data_Retrieved_Rate = (parcels_with_data / municipality_data['parcel_count']) * 100 if municipality_data['parcel_count'] > 0 else 0
         
         individuals_cat_a_raw = df_raw[(df_raw['Tipo_Proprietario'] == 'Privato') & (df_raw['classamento'].str.contains('Cat.A', na=False))]
-        category_a_filter_rate = (len(validation_ready) / len(individuals_cat_a_raw)) * 100 if len(individuals_cat_a_raw) > 0 else 0
+        Residential_Viability_Rate = (len(validation_ready) / len(individuals_cat_a_raw)) * 100 if len(individuals_cat_a_raw) > 0 else 0
         
         geocoding_success_count = 0
         if 'Geocoding_Status' in validation_ready.columns:
             geocoding_success_count = len(validation_ready[validation_ready['Geocoding_Status'] == 'Success'])
-        address_geocoding_success_rate = (geocoding_success_count / len(validation_ready)) * 100 if len(validation_ready) > 0 else 0
+        Address_Verification_Rate = (geocoding_success_count / len(validation_ready)) * 100 if len(validation_ready) > 0 else 0
 
         # v2.9.2: Revised metric calculations
         direct_mail_contacts = 0
@@ -1155,16 +1254,16 @@ Best,
             
             # Existing metrics
             "Input_Parcels": municipality_data['parcel_count'],
-            "API_Success_Rate": api_success_rate,
-            "Unique_Individual_Owners": len(individual_cfs),
+            "Property_Data_Retrieved_Rate": Property_Data_Retrieved_Rate,
+            "Individual_Landowners_Found": len(individual_cfs),
             "Unique_Company_Owners": len(company_cfs),
             "Interpolation_Risks_Detected": interpolation_risks,
             "Hectares_Direct_Mail": hectares_direct_mail,
             "Companies_With_PEC": companies_with_pec,
             "Unique_Owners_on_Target_Parcels": validation_ready['cf'].nunique() if not validation_ready.empty else 0,
             "PEC_Success_Rate": pec_success_rate,
-            "Category_A_Filter_Rate": category_a_filter_rate,
-            "Address_Geocoding_Success_Rate": address_geocoding_success_rate,
+            "Residential_Viability_Rate": Residential_Viability_Rate,
+            "Address_Verification_Rate": Address_Verification_Rate,
             
             # REVISED v2.9.2: Funnel Metrics
             "Input_Area_Ha": funnel_metrics.get("input_area_ha", 0) if funnel_metrics else 0,
@@ -1174,7 +1273,7 @@ Best,
             "Private_Owner_Area_Ha": funnel_metrics.get("private_owner_area_ha", 0) if funnel_metrics else 0,
             "Company_Owner_Parcels": funnel_metrics.get("company_owner_parcels", 0) if funnel_metrics else 0,
             "Company_Owner_Area_Ha": funnel_metrics.get("company_owner_area_ha", 0) if funnel_metrics else 0,
-            "After_CatA_Filter_Parcels": funnel_metrics.get("after_cata_filter_parcels", 0) if funnel_metrics else 0,
+            "Residential_Contact_ParcelsResidential_Contact_Parcels": funnel_metrics.get("Residential_Contact_ParcelsResidential_Contact_Parcels", 0) if funnel_metrics else 0,
             "After_CatA_Filter_Area_Ha": funnel_metrics.get("after_cata_filter_area_ha", 0) if funnel_metrics else 0,
             "Unique_Owner_Address_Pairs": len(validation_ready) if not validation_ready.empty else 0, # FIXED
             "Direct_Mail_Final_Contacts": direct_mail_contacts, # REVISED
@@ -1528,8 +1627,15 @@ Best,
         self.get_manual_balance_input("end")
         campaign_dir = os.path.join(self.config.get("output_structure", {}).get("completed_campaigns_dir", "completed_campaigns"), campaign_name)
         self.create_enhanced_cost_summary(campaign_name, campaign_dir)
-        # PowerBI export can be adapted or removed if the new summary is sufficient
-        # self.create_powerbi_export(campaign_name, campaign_dir)
+        # PowerBI export for dashboard integration
+        print("🔍 DEBUG: Starting PowerBI export...")
+        try:
+            self.create_powerbi_export_from_consolidated_data(campaign_name, campaign_dir)
+            print("✅ PowerBI export function completed")
+        except Exception as e:
+            print(f"❌ PowerBI export failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
         self.copy_to_onedrive(campaign_name, campaign_dir)
         
         print(f"\n✅ ENHANCED CAMPAIGN COMPLETED (v2.9.5)")
@@ -1579,7 +1685,7 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
             "private_owner_area_ha": 0.0,
             "company_owner_parcels": 0,
             "company_owner_area_ha": 0.0,
-            "after_cata_filter_parcels": 0,
+            "Residential_Contact_ParcelsResidential_Contact_Parcels": 0,
             "after_cata_filter_area_ha": 0.0,
             "unique_contacts": 0,
             "direct_mail_contacts": 0,
@@ -1669,7 +1775,7 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         
         if not individuals_cat_a.empty:
             cat_a_parcels = individuals_cat_a[['foglio_input', 'particella_input']].drop_duplicates()
-            funnel_metrics["after_cata_filter_parcels"] = len(cat_a_parcels)
+            funnel_metrics["Residential_Contact_ParcelsResidential_Contact_Parcels"] = len(cat_a_parcels)
             cat_a_area_df = individuals_cat_a.drop_duplicates(subset=['foglio_input', 'particella_input'])
             funnel_metrics["after_cata_filter_area_ha"] = pd.to_numeric(cat_a_area_df['Area'].astype(str).str.replace(',', '.'), errors='coerce').fillna(0).sum()
 
@@ -1704,7 +1810,7 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         }
 
     def create_funnel_analysis_df(self, summary_metrics, funnel_metrics, municipality_data):
-        """v3.0.0: Creates enhanced dual funnel analysis with conversion rates and business intelligence."""
+        """v3.1.1: Creates enhanced dual funnel analysis with business-friendly labels and metrics."""
         provincia = municipality_data.get('provincia', '')
         cp = municipality_data.get('CP', '')
         comune = municipality_data.get('comune', '')
@@ -1716,209 +1822,177 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                 'Stage': '1. Input Parcels',
                 'Count': funnel_metrics.get('input_parcels', 0),
                 'Hectares': round(funnel_metrics.get('input_area_ha', 0), 1),
-                'Conversion_Rate': None,
+                'Conversion / Multiplier': None,
                 'Retention_Rate': 100.0,
-                'Business_Rule': 'User input - parcels selected for acquisition analysis',
+                'Business_Rule': 'Parcels selected for acquisition analysis by the Land Acquisition team.',
                 'Automation_Level': 'Manual',
-                'Process_Notes': 'Campaign input from user selection',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'This is the starting point of the campaign, based on user-provided list of target parcels.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Land Acquisition',
-                'Stage': '2. API Data Retrieved',
+                'Stage': '2. Ownership Data Retrieved',
                 'Count': funnel_metrics.get('after_api_parcels', 0),
                 'Hectares': round(funnel_metrics.get('after_api_area_ha', 0), 1),
-                'Conversion_Rate': round((funnel_metrics.get('after_api_parcels', 0) / funnel_metrics.get('input_parcels', 1) * 100), 1) if funnel_metrics.get('input_parcels', 0) > 0 else 0,
+                'Conversion / Multiplier': round((funnel_metrics.get('after_api_parcels', 0) / funnel_metrics.get('input_parcels', 1) * 100), 1) if funnel_metrics.get('input_parcels', 0) > 0 else 0,
                 'Retention_Rate': round((funnel_metrics.get('after_api_parcels', 0) / funnel_metrics.get('input_parcels', 1) * 100), 1) if funnel_metrics.get('input_parcels', 0) > 0 else 0,
-                'Business_Rule': 'API successfully retrieved ownership data',
+                'Business_Rule': 'System successfully retrieves ownership data from the Italian Land Registry API.',
                 'Automation_Level': 'Fully-Auto',
-                'Process_Notes': f'API success rate: {round((funnel_metrics.get("after_api_parcels", 0) / funnel_metrics.get("input_parcels", 1) * 100), 1) if funnel_metrics.get("input_parcels", 0) > 0 else 0}%',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': f"Represents the API success rate. Parcels are dropped if no data is found.",
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Land Acquisition',
-                'Stage': '3. Private Owners Only',
+                'Stage': '3. Parcels w/ Private Owners',
                 'Count': summary_metrics.get('Private_Owner_Parcels', 0),
                 'Hectares': round(summary_metrics.get('Private_Owner_Area_Ha', 0), 1),
-                'Conversion_Rate': round((summary_metrics.get('Private_Owner_Parcels', 0) / funnel_metrics.get('after_api_parcels', 1) * 100), 1) if funnel_metrics.get('after_api_parcels', 0) > 0 else 0,
+                'Conversion / Multiplier': round((summary_metrics.get('Private_Owner_Parcels', 0) / funnel_metrics.get('after_api_parcels', 1) * 100), 1) if funnel_metrics.get('after_api_parcels', 0) > 0 else 0,
                 'Retention_Rate': round((summary_metrics.get('Private_Owner_Parcels', 0) / funnel_metrics.get('input_parcels', 1) * 100), 1) if funnel_metrics.get('input_parcels', 0) > 0 else 0,
-                'Business_Rule': 'Filter applied - exclude company owners',
+                'Business_Rule': 'Filters for parcels owned by individuals, excluding companies and government entities.',
                 'Automation_Level': 'Fully-Auto',
-                'Process_Notes': f'Private owner rate: {round((summary_metrics.get("Private_Owner_Parcels", 0) / funnel_metrics.get("after_api_parcels", 1) * 100), 1) if funnel_metrics.get("after_api_parcels", 0) > 0 else 0}%',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'Focuses the acquisition effort on private landowners, who are the primary target for this campaign.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Land Acquisition',
-                'Stage': '4. Category A Filter',
-                'Count': summary_metrics.get('After_CatA_Filter_Parcels', 0),
+                'Stage': '4. Parcels w/ Residential Buildings',
+                'Count': summary_metrics.get('Residential_Contact_ParcelsResidential_Contact_Parcels', 0),
                 'Hectares': round(summary_metrics.get('After_CatA_Filter_Area_Ha', 0), 1),
-                'Conversion_Rate': round((summary_metrics.get('After_CatA_Filter_Parcels', 0) / summary_metrics.get('Private_Owner_Parcels', 1) * 100), 1) if summary_metrics.get('Private_Owner_Parcels', 0) > 0 else 0,
-                'Retention_Rate': round((summary_metrics.get('After_CatA_Filter_Parcels', 0) / funnel_metrics.get('input_parcels', 1) * 100), 1) if funnel_metrics.get('input_parcels', 0) > 0 else 0,
-                'Business_Rule': 'Category A filter - remove non-residential properties',
+                'Conversion / Multiplier': round((summary_metrics.get('Residential_Contact_ParcelsResidential_Contact_Parcels', 0) / summary_metrics.get('Private_Owner_Parcels', 1) * 100), 1) if summary_metrics.get('Private_Owner_Parcels', 0) > 0 else 0,
+                'Retention_Rate': round((summary_metrics.get('Residential_Contact_ParcelsResidential_Contact_Parcels', 0) / funnel_metrics.get('input_parcels', 1) * 100), 1) if funnel_metrics.get('input_parcels', 0) > 0 else 0,
+                'Business_Rule': 'Filters for properties with a residential building (Catasto Category A).',
                 'Automation_Level': 'Fully-Auto',
-                'Process_Notes': f'Property type filtering - {round((1 - summary_metrics.get("After_CatA_Filter_Parcels", 0) / summary_metrics.get("Private_Owner_Parcels", 1)) * 100, 1) if summary_metrics.get("Private_Owner_Parcels", 0) > 0 else 0}% removed',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'These parcels are most likely to have a valid residential address for mailing campaigns.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             }
         ]
         
         # CONTACT PROCESSING PIPELINE
+        # Get the starting count for Contact Processing funnel (Owner Discovery)
+        owner_discovery_count_for_retention = summary_metrics.get('Unique_Owners_on_Target_Parcels', 0)
+
         contact_processing_data = [
             {
                 'Funnel_Type': 'Contact Processing',
-                'Stage': '1. Owners Identified',
-                'Count': summary_metrics.get('Unique_Owners_on_Target_Parcels', 0),
+                'Stage': '1. Owner Discovery',
+                'Count': owner_discovery_count_for_retention,
                 'Hectares': round(summary_metrics.get('After_CatA_Filter_Area_Ha', 0), 1),
-                'Conversion_Rate': round((summary_metrics.get('Unique_Owners_on_Target_Parcels', 0) / summary_metrics.get('After_CatA_Filter_Parcels', 1) * 100), 1) if summary_metrics.get('After_CatA_Filter_Parcels', 0) > 0 else 0,
-                'Retention_Rate': 100.0,
-                'Business_Rule': 'Owner identification from qualified parcels',
+                'Conversion / Multiplier': round(owner_discovery_count_for_retention / (summary_metrics.get('Residential_Contact_ParcelsResidential_Contact_Parcels') if summary_metrics.get('Residential_Contact_ParcelsResidential_Contact_Parcels') else 1), 2),
+                'Retention_Rate': 100.0, # Always 100% for the starting stage of this funnel
+                'Stage_Conversion_Rate': 100.0, # Always 100% for the starting stage
+                'Business_Rule': 'Multiple owners can be identified for a single parcel.',
                 'Automation_Level': 'Fully-Auto',
-                'Process_Notes': f'{round(summary_metrics.get("Unique_Owners_on_Target_Parcels", 0) / summary_metrics.get("After_CatA_Filter_Parcels", 1), 2) if summary_metrics.get("After_CatA_Filter_Parcels", 0) > 0 else 0} owners per parcel average',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'This rate shows the average # of unique owners found per qualified parcel. A value > 1.0x is common.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Contact Processing',
-                'Stage': '2. Address Pairs Created',
+                'Stage': '2. Address Expansion',
                 'Count': summary_metrics.get('Unique_Owner_Address_Pairs', 0),
                 'Hectares': round(summary_metrics.get('After_CatA_Filter_Area_Ha', 0), 1),
-                'Conversion_Rate': 100.0,  # All owners get at least one address
-                'Retention_Rate': 100.0,
-                'Business_Rule': 'Address expansion - multiple addresses per owner',
+                'Conversion / Multiplier': round(summary_metrics.get('Unique_Owner_Address_Pairs', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1), 2),
+                'Retention_Rate': round((summary_metrics.get('Unique_Owner_Address_Pairs', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1) * 100), 1),
+                'Stage_Conversion_Rate': round((summary_metrics.get('Unique_Owner_Address_Pairs', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1) * 100), 1), # From previous stage (Owner Discovery)
+                'Business_Rule': 'All known residential addresses are collected for each unique owner.',
                 'Automation_Level': 'Fully-Auto',
-                'Process_Notes': f'{round(summary_metrics.get("Unique_Owner_Address_Pairs", 0) / summary_metrics.get("Unique_Owners_on_Target_Parcels", 1), 1) if summary_metrics.get("Unique_Owners_on_Target_Parcels", 0) > 0 else 0} addresses per owner average',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'Shows the average # of addresses found per owner. A value > 1.0x indicates owners with multiple properties.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Contact Processing',
-                'Stage': '3. Geocoding Completed',
+                'Stage': '3. Address Validation & Enhancement',
                 'Count': summary_metrics.get('Unique_Owner_Address_Pairs', 0),
                 'Hectares': round(summary_metrics.get('After_CatA_Filter_Area_Ha', 0), 1),
-                'Conversion_Rate': 100.0,
-                'Retention_Rate': 100.0,
-                'Business_Rule': 'All addresses geocoded and quality assessed',
+                'Conversion / Multiplier': None, # This is an enrichment step, not a conversion
+                'Retention_Rate': round((summary_metrics.get('Unique_Owner_Address_Pairs', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1) * 100), 1),
+                'Stage_Conversion_Rate': 100.0, # From previous stage (Address Expansion) - all addresses are validated
+                'Business_Rule': 'All collected addresses are processed through geocoding and quality assessment.',
                 'Automation_Level': 'Fully-Auto',
-                'Process_Notes': 'Enhanced classification applied to all addresses',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'This is a data enrichment step, not a filter. All addresses are retained and classified.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Contact Processing',
                 'Stage': '4. Direct Mail Ready',
                 'Count': summary_metrics.get('Direct_Mail_Final_Contacts', 0),
                 'Hectares': round(summary_metrics.get('Direct_Mail_Final_Area_Ha', 0), 1),
-                'Conversion_Rate': round((summary_metrics.get('Direct_Mail_Final_Contacts', 0) / summary_metrics.get('Unique_Owner_Address_Pairs', 1) * 100), 1) if summary_metrics.get('Unique_Owner_Address_Pairs', 0) > 0 else 0,
-                'Retention_Rate': round((summary_metrics.get('Direct_Mail_Final_Contacts', 0) / summary_metrics.get('Unique_Owner_Address_Pairs', 1) * 100), 1) if summary_metrics.get('Unique_Owner_Address_Pairs', 0) > 0 else 0,
-                'Business_Rule': 'High confidence addresses routed for direct mailing',
+                'Conversion / Multiplier': round((summary_metrics.get('Direct_Mail_Final_Contacts', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1)), 2), # Overall conversion from Owner Discovery
+                'Retention_Rate': round((summary_metrics.get('Direct_Mail_Final_Contacts', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1) * 100), 1),
+                'Stage_Conversion_Rate': round((summary_metrics.get('Direct_Mail_Final_Contacts', 0) / (summary_metrics.get('Unique_Owner_Address_Pairs') if summary_metrics.get('Unique_Owner_Address_Pairs') else 1) * 100), 1), # From previous stage (Address Validation)
+                'Business_Rule': 'High-confidence addresses (ULTRA_HIGH, HIGH, some MEDIUM) are routed for direct mailing.',
                 'Automation_Level': 'Semi-Auto',
-                'Process_Notes': 'ULTRA_HIGH + HIGH + selected MEDIUM confidence addresses',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'These contacts are considered reliable enough for immediate outreach with minimal review.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             },
             {
                 'Funnel_Type': 'Contact Processing',
-                'Stage': '5. Agency Required',
+                'Stage': '5. Agency Investigation Required',
                 'Count': summary_metrics.get('Agency_Final_Contacts', 0),
                 'Hectares': round(summary_metrics.get('Agency_Final_Area_Ha', 0), 1),
-                'Conversion_Rate': round((summary_metrics.get('Agency_Final_Contacts', 0) / summary_metrics.get('Unique_Owner_Address_Pairs', 1) * 100), 1) if summary_metrics.get('Unique_Owner_Address_Pairs', 0) > 0 else 0,
-                'Retention_Rate': round((summary_metrics.get('Agency_Final_Contacts', 0) / summary_metrics.get('Unique_Owner_Address_Pairs', 1) * 100), 1) if summary_metrics.get('Unique_Owner_Address_Pairs', 0) > 0 else 0,
-                'Business_Rule': 'Low confidence addresses require agency investigation',
+                'Conversion / Multiplier': round((summary_metrics.get('Agency_Final_Contacts', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1)), 2), # Overall conversion from Owner Discovery
+                'Retention_Rate': round((summary_metrics.get('Agency_Final_Contacts', 0) / (owner_discovery_count_for_retention if owner_discovery_count_for_retention else 1) * 100), 1),
+                'Stage_Conversion_Rate': round((summary_metrics.get('Agency_Final_Contacts', 0) / (summary_metrics.get('Unique_Owner_Address_Pairs') if summary_metrics.get('Unique_Owner_Address_Pairs') else 1) * 100), 1), # From previous stage (Address Validation)
+                'Business_Rule': 'Low-confidence addresses (LOW, some MEDIUM) require external agency investigation.',
                 'Automation_Level': 'Manual',
-                'Process_Notes': 'LOW confidence + selected MEDIUM confidence addresses',
-                'CP': cp,
-                'comune': comune,
-                'provincia': provincia
+                'Process_Notes': 'These contacts require manual verification before they can be used in a mailing campaign.',
+                'CP': cp, 'comune': comune, 'provincia': provincia
             }
         ]
         
-        return pd.DataFrame(land_acquisition_data + contact_processing_data)
+        df = pd.DataFrame(land_acquisition_data + contact_processing_data)
+        # Rename column for clarity
+        df.rename(columns={'Conversion_Rate': 'Conversion / Multiplier'}, inplace=True)
+        return df
 
     def create_quality_distribution_df(self, df_validation, campaign_cp, campaign_municipalities, campaign_provincia):
-        """
-        Create address quality distribution analysis
-        
-        Args:
-            df_validation: Validation ready DataFrame with address confidence data
-            campaign_cp: Campaign CP identifier
-            campaign_municipalities: List of municipalities
-            campaign_provincia: Province identifier
-            
-        Returns:
-            pd.DataFrame: Quality distribution with automation metrics
-        """
-        
-        if len(df_validation) == 0:
+        """v3.1.1: Create address quality distribution with corrected rounding logic."""
+        if df_validation.empty:
             return pd.DataFrame(columns=[
                 'Quality_Level', 'Count', 'Percentage', 'Processing_Type', 
                 'Business_Value', 'Automation_Level', 'Routing_Decision',
                 'CP', 'comune', 'provincia'
             ])
-        
-        # Calculate quality distribution
+
         quality_counts = df_validation['Address_Confidence'].value_counts()
         total_addresses = len(df_validation)
         
-        # Define quality levels and their business characteristics
         quality_definitions = {
-            'ULTRA_HIGH': {
-                'Processing_Type': 'Zero Touch',
-                'Business_Value': 'Immediate print ready',
-                'Automation_Level': 'Fully-Auto',
-                'Routing_Decision': 'Direct Mail'
-            },
-            'HIGH': {
-                'Processing_Type': 'Quick Review',
-                'Business_Value': 'Minimal validation needed',
-                'Automation_Level': 'Semi-Auto',
-                'Routing_Decision': 'Direct Mail'
-            },
-            'MEDIUM': {
-                'Processing_Type': 'Standard Review',
-                'Business_Value': 'Normal processing required',
-                'Automation_Level': 'Manual',
-                'Routing_Decision': 'Mixed (Direct Mail + Agency)'
-            },
-            'LOW': {
-                'Processing_Type': 'Agency Routing',
-                'Business_Value': 'External investigation required',
-                'Automation_Level': 'Manual',
-                'Routing_Decision': 'Agency'
-            }
+            'ULTRA_HIGH': {'Processing_Type': 'Zero Touch', 'Business_Value': 'Immediate print ready', 'Automation_Level': 'Fully-Auto', 'Routing_Decision': 'Direct Mail'},
+            'HIGH': {'Processing_Type': 'Quick Review', 'Business_Value': 'Minimal validation needed', 'Automation_Level': 'Semi-Auto', 'Routing_Decision': 'Direct Mail'},
+            'MEDIUM': {'Processing_Type': 'Standard Review', 'Business_Value': 'Normal processing required', 'Automation_Level': 'Manual', 'Routing_Decision': 'Mixed (Direct Mail + Agency)'},
+            'LOW': {'Processing_Type': 'Agency Routing', 'Business_Value': 'External investigation required', 'Automation_Level': 'Manual', 'Routing_Decision': 'Agency'}
         }
-        
-        # Create quality distribution data
+
+        quality_levels = ['ULTRA_HIGH', 'HIGH', 'MEDIUM', 'LOW']
         quality_data = []
-        for quality_level in ['ULTRA_HIGH', 'HIGH', 'MEDIUM', 'LOW']:
-            count = quality_counts.get(quality_level, 0)
-            percentage = round((count / total_addresses * 100) if total_addresses > 0 else 0, 1)
+        percentages = []
+
+        if total_addresses > 0:
+            # Calculate high-precision percentages first
+            raw_percentages = [(quality_counts.get(level, 0) / total_addresses) * 100 for level in quality_levels]
             
-            quality_info = quality_definitions.get(quality_level, {
-                'Processing_Type': 'Unknown',
-                'Business_Value': 'Not defined',
-                'Automation_Level': 'Manual',
-                'Routing_Decision': 'Unknown'
-            })
+            # Round all but the last one
+            for i in range(len(raw_percentages) - 1):
+                percentages.append(round(raw_percentages[i], 1))
+            
+            # Ensure the sum is exactly 100.0
+            last_percentage = 100.0 - sum(percentages)
+            percentages.append(round(last_percentage, 1))
+        else:
+            percentages = [0.0, 0.0, 0.0, 0.0]
+
+        for i, quality_level in enumerate(quality_levels):
+            count = quality_counts.get(quality_level, 0)
+            quality_info = quality_definitions.get(quality_level, {})
             
             quality_data.append({
                 'Quality_Level': quality_level,
                 'Count': count,
-                'Percentage': percentage,
-                'Processing_Type': quality_info['Processing_Type'],
-                'Business_Value': quality_info['Business_Value'],
-                'Automation_Level': quality_info['Automation_Level'],
-                'Routing_Decision': quality_info['Routing_Decision'],
+                'Percentage': percentages[i],
+                'Processing_Type': quality_info.get('Processing_Type', 'Unknown'),
+                'Business_Value': quality_info.get('Business_Value', 'Not defined'),
+                'Automation_Level': quality_info.get('Automation_Level', 'Manual'),
+                'Routing_Decision': quality_info.get('Routing_Decision', 'Unknown'),
                 'CP': campaign_cp,
                 'comune': '; '.join(campaign_municipalities) if isinstance(campaign_municipalities, list) else campaign_municipalities,
                 'provincia': campaign_provincia
@@ -1944,12 +2018,12 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         
         # Land acquisition efficiency
         input_parcels = land_funnel[land_funnel['Stage'] == '1. Input Parcels']['Count'].iloc[0]
-        qualified_parcels = land_funnel[land_funnel['Stage'] == '4. Category A Filter']['Count'].iloc[0]
+        qualified_parcels = land_funnel[land_funnel['Stage'] == '4. Parcels w/ Residential Buildings']['Count'].iloc[0]
         land_efficiency = round((qualified_parcels / input_parcels * 100) if input_parcels > 0 else 0, 1)
         
         # Contact multiplication
-        owners = contact_funnel[contact_funnel['Stage'] == '1. Owners Identified']['Count'].iloc[0]
-        addresses = contact_funnel[contact_funnel['Stage'] == '2. Address Pairs Created']['Count'].iloc[0]
+        owners = contact_funnel[contact_funnel['Stage'] == '1. Owner Discovery']['Count'].iloc[0]
+        addresses = contact_funnel[contact_funnel['Stage'] == '2. Address Expansion']['Count'].iloc[0]
         contact_multiplication = round((addresses / qualified_parcels) if qualified_parcels > 0 else 0, 1)
         
         # Direct mail efficiency
@@ -2196,7 +2270,7 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                 'After_API_Area_Ha': df_campaign_summary['After_API_Area_Ha'].sum(),
                 'Private_Owner_Parcels': df_campaign_summary['Private_Owner_Parcels'].sum(),
                 'Private_Owner_Area_Ha': df_campaign_summary['Private_Owner_Area_Ha'].sum(),
-                'After_CatA_Filter_Parcels': df_campaign_summary['After_CatA_Filter_Parcels'].sum(),
+                'Residential_Contact_ParcelsResidential_Contact_Parcels': df_campaign_summary['Residential_Contact_ParcelsResidential_Contact_Parcels'].sum(),
                 'After_CatA_Filter_Area_Ha': df_campaign_summary['After_CatA_Filter_Area_Ha'].sum(),
                 'Unique_Owners_on_Target_Parcels': df_campaign_summary['Unique_Owners_on_Target_Parcels'].sum(),
                 'Unique_Owner_Address_Pairs': df_campaign_summary['Unique_Owner_Address_Pairs'].sum(),
@@ -2219,16 +2293,41 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                 'provincia': campaign_provincia
             }
             
-            # Create enhanced funnel with aggregated data
-            df_all_funnels = self.create_funnel_analysis_df(
-                aggregated_summary, aggregated_funnel_metrics, aggregated_municipality
-            )
+            # DEBUG: Enhanced features creation with error handling
+            print("🔍 DEBUG: Starting enhanced features creation...")
+            print(f"  Campaign Summary shape: {df_campaign_summary.shape}")
+            print(f"  Validation Ready shape: {df_all_validation_ready.shape}")
+            
+            print("✅ Campaign summary available - creating enhanced funnel...")
+            try:
+                # Create enhanced funnel with aggregated data
+                df_all_funnels = self.create_funnel_analysis_df(
+                    aggregated_summary, aggregated_funnel_metrics, aggregated_municipality
+                )
+                print(f"✅ Enhanced funnel created: {len(df_all_funnels)} rows")
+                print(f"   Funnel columns: {list(df_all_funnels.columns) if not df_all_funnels.empty else 'Empty DataFrame'}")
+            except Exception as e:
+                print(f"❌ Enhanced funnel creation failed: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                df_all_funnels = pd.DataFrame()
             
             # Create quality distribution analysis
             if not df_all_validation_ready.empty:
-                df_quality_distribution = self.create_quality_distribution_df(
-                    df_all_validation_ready, campaign_cp, campaign_municipalities, campaign_provincia
-                )
+                print("✅ Validation data available - creating quality distribution...")
+                try:
+                    df_quality_distribution = self.create_quality_distribution_df(
+                        df_all_validation_ready, campaign_cp, campaign_municipalities, campaign_provincia
+                    )
+                    print(f"✅ Quality distribution created: {len(df_quality_distribution)} rows")
+                    print(f"   Quality columns: {list(df_quality_distribution.columns) if not df_quality_distribution.empty else 'Empty DataFrame'}")
+                except Exception as e:
+                    print(f"❌ Quality distribution creation failed: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    df_quality_distribution = pd.DataFrame()
+            else:
+                print("❌ No validation data - skipping quality distribution")
         
         # Calculate executive KPIs
         executive_kpis = {}
@@ -2250,7 +2349,7 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
             
             # 1. Get all unique, high-confidence mailing addresses for each owner
             high_confidence_contacts = df_all_validation_ready[
-                df_all_validation_ready['Address_Confidence'].isin(['ULTRA_HIGH', 'HIGH'])
+                df_all_validation_ready['Address_Confidence'].isin(['ULTRA_HIGH', 'HIGH', 'MEDIUM'])
             ]
             owner_to_addresses = high_confidence_contacts.groupby('cf')['Best_Address'].unique().apply(list).to_dict()
 
@@ -2282,18 +2381,23 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
                 mailing_addresses = owner_to_addresses.get(cf, [])
                 
                 # Create a row for each unique address
-                for address in mailing_addresses:
+                for address_idx, address in enumerate(mailing_addresses):
                     output_rows.append({
                         'Municipality': f"{comune} ({provincia})",
                         'Foglio': fogli,
                         'Particella': particelle,
                         'Parcels': parcels_display,
                         'Full_Name': full_name,
-                        'Mailing_Address': address
+                        'cf': cf, # Add fiscal code
+                        'Mailing_Address': address,
+                        'Addresses_Per_Owner': len(mailing_addresses), # Total addresses for this owner
+                        'Address_Sequence': address_idx + 1 # Sequence for this address
                     })
             
             if output_rows:
                 df_strategic_mailing = pd.DataFrame(output_rows)
+                # Sort by owner (cf) and then by address sequence
+                df_strategic_mailing = df_strategic_mailing.sort_values(by=['cf', 'Address_Sequence']).reset_index(drop=True)
                 df_owners_wide, df_owners_normalized = self.create_owners_by_parcel_sheets(df_all_raw)
                 df_scorecard = self.create_campaign_scorecard(df_all_validation_ready, df_all_companies)
                 
@@ -2317,9 +2421,13 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
             if not df_all_funnels.empty:
                 df_all_funnels.to_excel(writer, sheet_name='Enhanced_Funnel_Analysis', index=False)
                 print(f"   📊 Enhanced_Funnel_Analysis: {len(df_all_funnels)} funnel stages with conversion rates")
+            else:
+                print(f"   ❌ Enhanced_Funnel_Analysis: DataFrame is empty - sheet not created")
             if not df_quality_distribution.empty:
                 df_quality_distribution.to_excel(writer, sheet_name='Address_Quality_Distribution', index=False)
                 print(f"   🎯 Address_Quality_Distribution: Quality analysis with automation metrics")
+            else:
+                print(f"   ❌ Address_Quality_Distribution: DataFrame is empty - sheet not created")
             if not df_all_raw.empty:
                 df_all_raw.to_excel(writer, sheet_name='All_Raw_Data', index=False)
             
