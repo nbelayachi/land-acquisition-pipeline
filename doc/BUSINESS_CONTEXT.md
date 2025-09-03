@@ -129,42 +129,7 @@ Campaign Execution → Performance Tracking → Executive Reporting → Process 
 
 ---
 
-## 💼 **BUSINESS VALUE & METRICS**
 
-### **Cost Efficiency Metrics**
-- **Traditional Cost**: €50-100 per verified landowner contact
-- **Pipeline Cost**: €15-25 per verified contact (60-75% reduction)
-- **Time Savings**: Weeks → Hours for ownership identification
-- **Resource Optimization**: 17.4% zero-touch + 4.3% quick review = 21.7% automation
-
-### **Operational Efficiency Metrics**
-- **API Success Rate**: 95%+ when data available
-- **Geocoding Success**: 100% for valid addresses
-- **Contact Reduction**: 93% (128 raw records → 23 validated contacts)
-- **Processing Time**: ~2 minutes per municipality
-
-### **Business Impact Metrics**
-- **Parcel Coverage**: 30% of target parcels reach final mailing (current)
-- **Owner Reach**: 76.9% of identified owners contacted
-- **Quality Assurance**: 100% geocoding with confidence scoring
-- **Campaign Acceleration**: 17% of addresses ready for immediate printing
-
-### **ROI Analysis**
-- **Cost Per Hectare**: Reduced from €500 to €150 per hectare
-- **Success Rate Improvement**: 10-20% → 50%+ contact success
-- **Time to Campaign**: 6-8 weeks → 1-2 weeks
-- **Resource Efficiency**: 3-person team → 1-person operation
-
----
-
-
-## 👥 **STAKEHOLDER ROLES & RESPONSIBILITIES**
-
-### **Primary Users**
-- **Land Acquisition Team**: Identifies target areas, reviews final mailing lists
-- **Business Development**: Conducts initial negotiations with landowners
-- **Legal Team**: Handles contracts and due diligence
-- **Technical Team**: Maintains pipeline and data quality
 
 ### **Executive Stakeholders**
 - **Management**: Monitors KPIs and ROI metrics
