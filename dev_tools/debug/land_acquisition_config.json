@@ -1,0 +1,365 @@
+{
+  "land_acquisition_config": {
+    "api_settings": {
+      "token": "68b02866df1cb275cd082dc7",
+      "base_url": "https://catasto.openapi.it",
+      "max_retries": 3,
+      "timeout_seconds": 30,
+      "sleep_between_calls": 2
+    },
+    "geocoding_settings": {
+      "enabled": true,
+      "token": "68b02872ec7653618a068687",
+      "base_url": "https://geocoding.openapi.it",
+      "sleep_between_calls": 2,
+      "timeout_recovery_enabled": true,
+      "max_recovery_attempts": 30,
+      "recovery_delay_seconds": 5,
+      "max_recovery_age_hours": 24,
+      "apply_to_validation_ready": true,
+      "cache_enabled": true,
+      "source_column": "cleaned_ubicazione"
+    },
+    "pec_integration": {
+      "enabled": true,
+      "token": "68b028bce9cbd10e14020f75",
+      "cache_enabled": true,
+      "cache_expiry_days": 90,
+      "sleep_between_calls": 1
+    },
+    "cap_api_settings": {
+      "enabled": true,
+      "token": "68b7fbb6a40149b9f108c349",
+      "base_url": "https://cap.openapi.it",
+      "sleep_between_calls": 1
+    },
+    "enhanced_classification": {
+      "enabled": true,
+      "ultra_high_completeness_threshold": 0.75,
+      "high_completeness_threshold": 0.5,
+      "enable_ultra_high_confidence": true
+    },
+    "enhanced_funnel_analysis": {
+      "enabled": true,
+      "include_conversion_rates": true,
+      "include_business_rules": true,
+      "include_automation_levels": true,
+      "calculate_executive_kpis": true,
+      "include_quality_distribution": true,
+      "track_zero_touch_processing": true,
+      "excel_sheet_names": {
+        "enhanced_funnel": "Enhanced_Funnel_Analysis",
+        "quality_distribution": "Address_Quality_Distribution"
+      }
+    },
+    "cost_tracking": {
+      "method": "manual_balance_check",
+      "prompt_for_start_balance": true,
+      "prompt_for_end_balance": true,
+      "calculate_campaign_cost": true,
+      "save_cost_summary": true,
+      "display_cost_per_municipality": true,
+      "track_recovery_savings": true,
+      "track_geocoding_costs": true
+    },
+    "timeout_recovery": {
+      "enable_recovery": true,
+      "recovery_attempts": 30,
+      "recovery_delay_seconds": 5,
+      "max_recovery_age_hours": 24,
+      "estimated_cost_per_call": 0.5,
+      "auto_recovery_after_campaign": true,
+      "log_recovery_attempts": true,
+      "include_recovery_in_cost_summary": true,
+      "include_geocoding_recovery": true
+    },
+    "processing_settings": {
+      "auto_create_municipality_folders": true,
+      "municipality_naming_format": "{CP}_{comune_cleaned}",
+      "preserve_cp_context": true,
+      "generate_cp_summary": true,
+      "max_parcels_per_municipality": 500,
+      "cache_expiry_days": 180,
+      "save_timeout_request_ids": true,
+      "enable_address_geocoding": true
+    },
+    "output_structure": {
+      "local_processing_dir": "local_processing",
+      "completed_campaigns_dir": "completed_campaigns",
+      "onedrive_sync_path": "C:\\Users\\NassimBelayachi\\OneDrive - Ric Sun España\\Italy - Documentos\\Origination\\1. Land\\Campaigns\\test_workflow\\Campaigns",
+      "create_municipality_folders": true,
+      "generate_validation_ready_sheets": true,
+      "replace_hoja5_with_validation_ready": true,
+      "include_municipality_summaries": true,
+      "create_campaign_summary": true,
+      "generate_powerbi_export": true,
+      "auto_copy_to_onedrive": true,
+      "include_recovery_metrics": true,
+      "include_geocoding_metrics": true
+    },
+    "validation_ready_config": {
+      "sheet_name": "Validation_Ready",
+      "include_columns": [
+        "foglio_input",
+        "particella_input",
+        "cognome",
+        "nome",
+        "ubicazione",
+        "cleaned_ubicazione",
+        "Poste_Address",
+        "Geocoding_Status",
+        "Geocoded_Address_Italian",
+        "Street_Name",
+        "Street_Number",
+        "Postal_Code",
+        "City",
+        "Province_Name",
+        "Province_Code",
+        "Region",
+        "Sub_Locality",
+        "Country",
+        "Country_Code",
+        "Latitude",
+        "Longitude",
+        "Geocoding_Provider",
+        "Geocoding_ID"
+      ],
+      "auto_generate_composite_key": true,
+      "apply_address_cleaning": true,
+      "apply_geocoding_enhancement": true,
+      "flag_address_quality": true,
+      "sort_by_address_quality": true,
+      "include_instructions_sheet": true,
+      "mark_recovered_entries": true,
+      "prioritize_geocoded_addresses": true
+    },
+    "address_cleaning": {
+      "italian_street_types": [
+        "via",
+        "viale",
+        "vicolo",
+        "piazza",
+        "piazzale",
+        "corso",
+        "largo",
+        "circonvallazione",
+        "contrada",
+        "località",
+        "strada",
+        "borgo",
+        "lungomare",
+        "lungolago",
+        "salita",
+        "discesa",
+        "passeggiata",
+        "str",
+        "str.",
+        "stradone",
+        "fondamenta",
+        "ripa",
+        "ramo",
+        "riva",
+        "localita'"
+      ],
+      "remove_apartment_info": true,
+      "remove_floor_info": true,
+      "standardize_numbers": true,
+      "require_street_number": true,
+      "require_city_province": true,
+      "min_address_length": 15,
+      "allow_snc_addresses": true,
+      "prepare_for_geocoding": true
+    },
+    "powerbi_integration": {
+      "enabled": true,
+      "auto_export_data": true,
+      "export_format": "csv",
+      "encoding": "utf-8-sig",
+      "dataset_naming": "{campaign_name}_LandAcquisition_Data",
+      "export_filename": "PowerBI_Dataset.csv",
+      "include_campaign_metrics": true,
+      "include_cp_breakdown": true,
+      "include_municipality_analysis": true,
+      "create_dashboard_template": true,
+      "include_recovery_metrics": true,
+      "track_cost_savings": true,
+      "include_geocoding_metrics": true,
+      "include_address_quality_metrics": true
+    },
+    "team_sharing": {
+      "create_team_friendly_structure": true,
+      "include_how_to_guide": true,
+      "municipality_folder_template": "{cp}_{municipality}",
+      "validation_ready_filename": "Validation_Ready.xlsx",
+      "campaign_summary_filename": "Campaign_Summary.xlsx",
+      "instructions_filename": "How_to_Review_Addresses.pdf",
+      "auto_notification": false,
+      "include_recovery_report": true,
+      "include_geocoding_report": true,
+      "highlight_geocoded_addresses": true
+    },
+    "file_naming": {
+      "campaign_template": "{region}_{main_cp}_{date}",
+      "municipality_folder": "{cp}_{municipality_cleaned}",
+      "validation_ready": "Validation_Ready.xlsx",
+      "municipality_complete": "{municipality_key}_Complete_Results.xlsx",
+      "campaign_summary": "Campaign_Summary.xlsx",
+      "powerbi_dataset": "PowerBI_Dataset.csv",
+      "cost_summary": "Enhanced_Cost_Summary.txt",
+      "recovery_log": "Timeout_Recovery_Log.txt",
+      "geocoding_log": "Geocoding_Enhancement_Log.txt"
+    },
+    "logging": {
+      "log_recovery_attempts": true,
+      "log_request_ids": true,
+      "log_cost_savings": true,
+      "include_recovery_in_main_log": true,
+      "log_geocoding_attempts": true,
+      "log_geocoding_success_rate": true,
+      "include_geocoding_in_main_log": true
+    }
+  },
+  "quality_filters": {
+    "require_valid_coordinates": true,
+    "require_residential_only": true,
+    "require_individual_owners": true,
+    "require_valid_addresses": true,
+    "prefer_geocoded_addresses": true,
+    "min_property_area": 50,
+    "max_property_area": 10000,
+    "filter_by_cp": false,
+    "priority_cps": [
+      "Calderara",
+      "Martignone",
+      "Borgonovo Val Tidone"
+    ],
+    "exclude_recovered_duplicates": true,
+    "prioritize_zip_code_addresses": true
+  },
+  "workflow_integration": {
+    "business_development": {
+      "input_format": "excel",
+      "required_fields": [
+        "tipo_catasto",
+        "CP",
+        "provincia",
+        "comune",
+        "foglio",
+        "particella",
+        "Area"
+      ],
+      "optional_fields": [
+        "Sezione"
+      ],
+      "validation_checks": [
+        "valid_coordinates",
+        "cp_consistency",
+        "municipality_mapping",
+        "sezione_when_needed"
+      ]
+    },
+    "technical_user": {
+      "local_processing_only": true,
+      "manual_cost_tracking": true,
+      "onedrive_integration": true,
+      "powerbi_creation": true,
+      "automatic_timeout_recovery": true,
+      "cost_optimization_reporting": true,
+      "geocoding_enhancement": true,
+      "address_quality_improvement": true
+    },
+    "land_acquisition_team": {
+      "access_method": "onedrive_folders",
+      "file_format": "excel",
+      "validation_sheet_name": "Validation_Ready",
+      "required_fields": [
+        "foglio_input",
+        "particella_input",
+        "cognome",
+        "nome",
+        "ubicazione",
+        "Geocoded_Address_Italian"
+      ],
+      "include_quality_flags": true,
+      "include_geocoding_data": true,
+      "provide_instructions": true,
+      "show_recovery_status": false,
+      "highlight_postal_addresses": true,
+      "include_zip_codes": true
+    },
+    "upper_management": {
+      "access_method": "powerbi_dashboard",
+      "dashboard_type": "web_published",
+      "include_cost_summary": true,
+      "include_progress_tracking": true,
+      "automated_reporting": false,
+      "show_cost_optimization_metrics": true,
+      "highlight_recovery_savings": true,
+      "show_geocoding_enhancement_value": true,
+      "include_address_quality_metrics": true
+    }
+  },
+  "notification_settings": {
+    "campaign_completion": {
+      "method": "console_message",
+      "include_onedrive_path": true,
+      "include_powerbi_instructions": true,
+      "include_team_notification_template": true,
+      "highlight_recovery_results": true,
+      "show_cost_savings": true,
+      "highlight_geocoding_improvements": true,
+      "show_address_quality_metrics": true
+    },
+    "municipality_completion": {
+      "show_progress": true,
+      "include_validation_ready_count": true,
+      "track_timeout_requests": true,
+      "track_geocoding_success": true,
+      "show_address_enhancement_stats": true
+    },
+    "error_handling": {
+      "log_to_file": true,
+      "display_user_friendly_messages": true,
+      "continue_on_municipality_errors": true,
+      "save_failed_requests_for_recovery": true,
+      "save_failed_geocoding_for_retry": true,
+      "graceful_geocoding_fallback": true
+    },
+    "recovery_notifications": {
+      "show_recovery_progress": true,
+      "log_successful_recoveries": true,
+      "highlight_cost_savings": true,
+      "report_final_recovery_stats": true,
+      "show_geocoding_recovery_results": true,
+      "highlight_address_improvements": true
+    },
+    "geocoding_notifications": {
+      "show_geocoding_progress": true,
+      "log_successful_geocoding": true,
+      "report_geocoding_stats": true,
+      "highlight_address_quality_improvements": true,
+      "show_zip_code_success_rate": true
+    }
+  },
+  "user_interface": {
+    "launcher_mode": "simplified",
+    "show_cost_estimates": true,
+    "require_balance_input": true,
+    "show_onedrive_preview": true,
+    "include_team_instructions": true,
+    "display_powerbi_steps": true,
+    "highlight_timeout_recovery": true,
+    "show_cost_optimization_benefits": true,
+    "highlight_geocoding_benefits": true,
+    "show_address_quality_improvements": true
+  },
+  "processing_defaults": {
+    "municipality_batch_size": 50,
+    "validation_quality_threshold": 70,
+    "focus_residential": true,
+    "max_parcels_per_municipality": 500,
+    "enable_automatic_recovery": true,
+    "enable_geocoding_enhancement": true,
+    "geocoding_batch_size": 20
+  }
+}

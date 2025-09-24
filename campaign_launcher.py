@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Land Acquisition Campaign Launcher v3.1.5
+Land Acquisition Campaign Launcher v3.1.6
 Streamlined interface for renewable energy land acquisition campaigns
 Supports enhanced funnel analytics, address quality intelligence, and executive KPIs
 
-@version: 3.1.5 (Enhanced Funnel Analytics + Business Intelligence + Usability)
+@version: 3.1.6 (Enhanced Funnel Analytics + Business Intelligence + Cost Tracking)
 @updated: July 2025
 """
 
@@ -16,7 +16,7 @@ from pathlib import Path
 
 class LandAcquisitionCampaignLauncher:
     def __init__(self):
-        self.version = "3.1.5"
+        self.version = "3.1.6"
         self.load_config()
         
     def load_config(self):
@@ -27,6 +27,24 @@ class LandAcquisitionCampaignLauncher:
         except FileNotFoundError:
             print("❌ Configuration file not found. Please ensure land_acquisition_config.json exists.")
             exit(1)
+    
+    def get_start_balance(self):
+        """Get starting API balance for cost tracking"""
+        print(f"\n💰 COST TRACKING - API BALANCE CHECK")
+        print("Before processing, please check your current API balance:")
+        print("1. Go to https://catasto.openapi.it/dashboard")
+        print("2. Check your current account balance")
+        print()
+        
+        while True:
+            try:
+                balance = float(input("Enter your current balance (€): "))
+                if balance >= 0:
+                    return balance
+                else:
+                    print("❌ Balance cannot be negative. Please enter a valid amount.")
+            except ValueError:
+                print("❌ Please enter a valid number (e.g., 45.50)")
     
     def show_welcome(self):
         """Display streamlined welcome screen"""
@@ -56,12 +74,13 @@ class LandAcquisitionCampaignLauncher:
         print(f"   • PowerBI Export: {'✅ ENABLED' if powerbi_export else '❌ DISABLED'}")
         print()
         
-        print("🆕 CURRENT FEATURES (v3.1.5):")
+        print("🆕 CURRENT FEATURES (v3.1.6):")
         print("   • Enhanced Final_Mailing_List with owner grouping and sequence numbers")
         print("   • Refined address classification for better confidence levels") 
         print("   • Business-friendly funnel metrics with executive KPIs")
         print("   • Comprehensive metrics documentation and validation")
         print("   • Zero-touch processing identification (17.4% automation)")
+        print("   • Integrated cost tracking with start/end balance prompts")
         print()
     
     def get_input_file(self):
@@ -121,7 +140,7 @@ class LandAcquisitionCampaignLauncher:
                 'total_parcels': len(df),
                 'total_municipalities': df['comune'].nunique(),
                 'total_area_ha': df['Area'].sum(),
-                'has_sezione': 'Sezione' in df.columns and df['Sezione'].notna().sum() > 0,
+                'has_sezione': bool('Sezione' in df.columns and df['Sezione'].notna().sum() > 0),
                 'main_municipalities': df['comune'].value_counts().head(3).to_dict(),
                 'dataframe': df
             }
@@ -224,14 +243,13 @@ class LandAcquisitionCampaignLauncher:
         
         return config_file
     
-    def show_next_steps(self, campaign_name, config_file):
+    def show_next_steps(self, campaign_name, config_file, start_balance):
         """Show how to execute the campaign"""
         print(f"\n✅ Campaign '{campaign_name}' configured successfully!")
         print(f"📁 Configuration saved: {config_file}")
         print()
         print("🚀 TO EXECUTE CAMPAIGN:")
-        print(f"   python land_acquisition_pipeline.py")
-        print("   (The pipeline will automatically use the latest configuration)")
+        print(f"   python land_acquisition_pipeline.py --config {config_file} --start-balance {start_balance}")
         print()
         print("⏱️  EXPECTED PROCESSING TIME:")
         print("   • ~2 minutes per municipality")
@@ -243,16 +261,18 @@ class LandAcquisitionCampaignLauncher:
         print("   • Import PowerBI_Dataset.csv to dashboards")
         print("   • Use Final_Mailing_List for team communications")
         print("   • Check Enhanced_Cost_Summary.txt for campaign costs")
+        print("   • You'll be prompted for end balance to calculate costs")
         print()
     
     def run(self):
         """Main launcher workflow"""
         try:
-            # Welcome and input
+            # Welcome and start balance
             self.show_welcome()
-            input_file = self.get_input_file()
+            start_balance = self.get_start_balance()
             
-            # Analysis
+            # Input file selection and analysis
+            input_file = self.get_input_file()
             analysis = self.analyze_input_file(input_file)
             if not analysis:
                 return
@@ -268,7 +288,7 @@ class LandAcquisitionCampaignLauncher:
             
             # Create configuration and show next steps
             config_file = self.create_campaign_config(input_file, campaign_name, analysis)
-            self.show_next_steps(campaign_name, config_file)
+            self.show_next_steps(campaign_name, config_file, start_balance)
             
         except KeyboardInterrupt:
             print("\n\n❌ Campaign launcher cancelled.")

@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Performance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1600px; margin: auto; padding: 20px; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); padding: 24px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        h1 { font-size: 28px; font-weight: 700; color: #1a202c; }
+        h2 { font-size: 20px; font-weight: 600; color: #2d3748; margin-bottom: 16px; }
+        .kpi-value { font-size: 36px; font-weight: 700; }
+        .kpi-label { font-size: 14px; color: #718096; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f7fafc; font-weight: 600; font-size: 12px; text-transform: uppercase; color: #a0aec0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="margin-bottom: 24px;">
+            <h1>Campaign Performance Dashboard</h1>
+            <p style="color: #718096;">Validated Analysis | Generated: 2025-07-18 14:30:28</p>
+        </header>
+
+        <div class="grid-container">
+            <div class="card">
+                <h2 class="kpi-label">Parcel Success Rate</h2>
+                <p class="kpi-value" style="color: #4299e1;">63.9%</p>
+                <p class="kpi-label">152 of 238 parcels retained</p>
+            </div>
+            <div class="card">
+                <h2 class="kpi-label">Area Retention Rate</h2>
+                <p class="kpi-value" style="color: #48bb78;">64.6%</p>
+                <p class="kpi-label">266.46 of 412.24 Ha retained</p>
+            </div>
+            <div class="card">
+                <h2 class="kpi-label">Avg. Owners per Parcel</h2>
+                <p class="kpi-value" style="color: #ed8936;">1.90</p>
+                <p class="kpi-label">Max owners on a parcel: 17</p>
+            </div>
+        </div>
+
+        <div class="grid-container" style="margin-top: 20px; grid-template-columns: 2fr 1fr;">
+            <div class="card">
+                <h2>Pipeline Funnel Analysis</h2>
+                <canvas id="funnelChart"></canvas>
+            </div>
+            <div class="card">
+                <h2>Address Quality</h2>
+                <canvas id="qualityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>Geographic Distribution of Final Parcels</h2>
+            <div class="table-container">
+                <table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Municipality</th>
+      <th>Parcel Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Carpenedolo</td>
+      <td>91</td>
+    </tr>
+    <tr>
+      <td>Castiglione Delle Stiviere</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <td>Montichiari</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <td>Casalpusterlengo</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <td>Fombio</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>Ospedaletto Lodigiano</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctxQuality = document.getElementById('qualityChart').getContext('2d');
+        new Chart(ctxQuality, {
+            type: 'doughnut',
+            data: {
+                labels: ["ULTRA_HIGH", "HIGH", "MEDIUM", "LOW"],
+                datasets: [{
+                    label: 'Address Quality',
+                    data: [271, 19, 268, 84],
+                    backgroundColor: ['#38A169', '#3182CE', '#DD6B20', '#E53E3E', '#805AD5'],
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        const ctxFunnel = document.getElementById('funnelChart').getContext('2d');
+        new Chart(ctxFunnel, {
+            type: 'bar',
+            data: {
+                labels: ["Land Acquisition", "Land Acquisition", "Land Acquisition", "Land Acquisition", "Contact Processing", "Contact Processing", "Contact Processing", "Contact Processing", "Contact Processing"],
+                datasets: [
+                    {
+                        label: 'Parcels',
+                        data: ["1. Input Parcels", "2. Ownership Data Retrieved", "3. Parcels w/ Private Owners", "4. Parcels w/ Residential Buildings", "1. Owner Discovery", "2. Address Expansion", "3. Address Validation & Enhancement", "4. Direct Mail Ready", "5. Agency Investigation Required"],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Area (Ha)',
+                        data: [228, 225, 183, 165, 174, 642, 642, 558, 84],
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+</html>

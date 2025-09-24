@@ -1,7 +1,7 @@
 {
   "land_acquisition_config": {
     "api_settings": {
-      "token": "685d159f01d22eb5c50bc4b2",
+      "token": "68b02866df1cb275cd082dc7",
       "base_url": "https://catasto.openapi.it",
       "max_retries": 3,
       "timeout_seconds": 30,
@@ -10,7 +10,7 @@
     
     "geocoding_settings": {
       "enabled": true,
-      "token": "68493c788d862afd200628aa",
+      "token": "68b02872ec7653618a068687",
       "base_url": "https://geocoding.openapi.it",
       "sleep_between_calls": 2,
       "timeout_recovery_enabled": true,
@@ -24,7 +24,7 @@
 
     "pec_integration": {
       "enabled": true,
-      "token": "684e22ee0e6f27925a0c9b16",
+      "token": "68b028bce9cbd10e14020f75",
       "cache_enabled": true,
       "cache_expiry_days": 90,
       "sleep_between_calls": 1

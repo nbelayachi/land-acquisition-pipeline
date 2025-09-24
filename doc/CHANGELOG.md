@@ -2,7 +2,42 @@
 
 # Changelog
 
-## [3.1.6] - 2025-07-06 🚀 MODERNIZED CAMPAIGN LAUNCHER + DOCUMENTATION RECONCILIATION
+## [3.1.8] - 2025-07-15 🔧 AGENCY METRICS CONSISTENCY FIX
+
+### 🔧 **Critical Metric Correction**
+- **`Agency_Final_Contacts` Consistency Fix**: The calculation for `Agency_Final_Contacts` has been corrected to align with the v3.1.7 `Direct_Mail_Final_Contacts` methodology.
+  - **Issue**: After v3.1.7 changed `Direct_Mail_Final_Contacts` to count by `Address_Confidence`, `Agency_Final_Contacts` still counted by `Routing_Channel`, creating an inconsistency where the two metrics counted different things.
+  - **Discovery**: Manual analysis revealed that `Agency_Final_Contacts` should count 84 addresses (LOW confidence) instead of 162 (routing-based), with total validation addresses being 642.
+  - **Solution**: `Agency_Final_Contacts` now counts addresses with `Address_Confidence` of 'LOW' only, maintaining consistency with the Direct_Mail counting method.
+  - **Technical Implementation**: Modified `create_municipality_summary` function in `land_acquisition_pipeline.py` to change `agency_df` filtering from routing-based to confidence-based.
+  - **Impact**: This ensures both metrics count addresses consistently, with correct totals: Direct_Mail (558) + Agency (84) = Total (642).
+  - **Documentation**: Updated `METRICS_GUIDE.md` with corrected definitions for both metrics.
+
+### 📊 **Corrected Values**
+- **Agency_Final_Contacts**: 162 → 84 (LOW confidence addresses only)
+- **Total_Final_Contacts**: 720 → 642 (matches total validation addresses)
+- **Direct_Mail_Percentage**: 77.5% → 86.9% (558/642 × 100)
+
+## [3.1.7] - 2025-07-15 📊 METRIC ALIGNMENT & CLARITY
+
+### 🔧 **Metric Calculation Update**
+- **`Direct_Mail_Final_Contacts` Redefined**: The calculation for `Direct_Mail_Final_Contacts` in `Campaign_Summary` and `Enhanced_Funnel_Analysis` has been updated to align with the `Final_Mailing_List` content.
+  - **Issue**: Previously, this metric only counted addresses explicitly routed as 'DIRECT_MAIL' by the `classify_address_quality_enhanced` function. However, the `Final_Mailing_List` was updated to include all `ULTRA_HIGH`, `HIGH`, and `MEDIUM` confidence addresses, leading to a discrepancy.
+  - **Solution**: The metric now counts all addresses with `Address_Confidence` of `ULTRA_HIGH`, `HIGH`, or `MEDIUM`. This ensures consistency between the reported metric and the actual contacts included in the `Final_Mailing_List`.
+  - **Technical Implementation**: Modified `create_municipality_summary` function in `land_acquisition_pipeline.py` to change the filtering logic for `direct_mail_df`.
+  - **Impact**: This change affects the reported numbers for `Direct_Mail_Final_Contacts` and `Direct_Mail_Final_Area_Ha`. `Agency_Final_Contacts` and `Agency_Final_Area_Ha` remain based on the 'AGENCY' routing channel.
+  - **Testing Required**: This change requires re-running a campaign to verify the updated metric calculations.
+
+## [3.1.6] - 2025-07-06 🚀 MODERNIZED CAMPAIGN LAUNCHER + COST TRACKING FIX
+
+### 🔧 **Critical Fix**
+- **Restored Start Balance Prompt**: Added missing API cost tracking functionality to modernized campaign launcher
+  - **Issue**: Campaign launcher was missing start balance prompt essential for cost calculation
+  - **Solution**: Added `get_start_balance()` method and integrated into workflow
+  - **Integration**: Balance now passed correctly to pipeline execution command
+  - **User Experience**: Clear cost tracking workflow with dashboard link guidance
+
+### ✨ **Campaign Launcher Modernization**
 
 ### ✨ **Major Updates**
 - **Completely Modernized Campaign Launcher**: Streamlined interface updated to v3.1.5 standards

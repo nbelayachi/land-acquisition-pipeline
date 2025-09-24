@@ -1,0 +1,515 @@
+📊 READING ACTUAL EXCEL STRUCTURE
+============================================================
+📋 Available sheets in data/Campaign4_Results.xlsx:
+   1. Campaign_Scorecard
+   2. Owners_By_Parcel
+   3. Address_Quality_Distribution
+   4. Enhanced_Funnel_Analysis
+   5. All_Validation_Ready
+   6. Final_Mailing_List
+   7. All_Companies_Found
+   8. Campaign_Summary
+   9. Owners_Normalized
+   10. All_Raw_Data
+
+🔍 SHEET: Campaign_Scorecard
+========================================
+   Rows: 3
+   Columns: 5
+   Column names:
+      1. Category
+      2. Unique People
+      3. Mailings Sent
+      4. Parcels Affected
+      5. Hectares Affected
+
+   Sample data (first 3 rows):
+     Category: ['Direct Mail Campaign', 'Agency Review', 'Company Outreach']
+     Unique People: [144, 70, '19 (Entities)']
+     Mailings Sent: [480, 162, '37 (PEC Found)']
+     Parcels Affected: [137, 85, 37]
+     Hectares Affected: [222.739, 187.635, 48.13500000000001]
+
+🔍 SHEET: Owners_By_Parcel
+========================================
+   Rows: 224
+   Columns: 38
+   Column names:
+      1. comune
+      2. CP
+      3. foglio_input
+      4. particella_input
+      5. parcel_area_ha
+      6. total_owners
+      7. owner_1_name
+      8. owner_1_cf
+      9. owner_1_quota
+     10. owner_2_name
+     11. owner_2_cf
+     12. owner_2_quota
+     13. owner_3_name
+     14. owner_3_cf
+     15. owner_3_quota
+     16. owner_4_name
+     17. owner_4_cf
+     18. owner_4_quota
+     19. owner_5_name
+     20. owner_5_cf
+     21. owner_5_quota
+     22. owner_6_name
+     23. owner_6_cf
+     24. owner_6_quota
+     25. owner_7_name
+     26. owner_7_cf
+     27. owner_7_quota
+     28. owner_8_name
+     29. owner_8_cf
+     30. owner_8_quota
+     31. owner_9_name
+     32. owner_9_cf
+     33. owner_9_quota
+     34. owner_10_name
+     35. owner_10_cf
+     36. owner_10_quota
+     37. additional_owners
+     38. ownership_summary
+
+   Sample data (first 3 rows):
+     comune: ['Carpenedolo', 'Carpenedolo', 'Carpenedolo']
+     CP: ['Castiglione', 'Castiglione', 'Castiglione']
+     foglio_input: [23, 14, 31]
+     particella_input: [297, 31, 443]
+     parcel_area_ha: [2.11, 0.429, 1.37]
+     total_owners: [13, 8, 8]
+     owner_1_name: ['BODINI TIZIANA', 'BONDIOLI ALBERTO', 'BICELLI PALMIRA']
+     owner_1_cf: ['BDNTZN63L49B817H', 'BNDLRT52B17B817Z', 'BCLPMR57R52F471L']
+     owner_1_quota: ['missing', '1/8', '9/54']
+     owner_2_name: ['BONDIOLI ANGELO', 'BONDIOLI EMILIA  nata a MONTICHIARI (BS) il 28/05/1961', 'BOZZOLA BRUNO']
+     owner_2_cf: ['BNDNGL66S04B817J', 'BNDMLE61E68F471H', 'BZZBRN57E06B817W']
+     owner_2_quota: ['1/8', '1/8', '9/54']
+     owner_3_name: ['BONDIOLI BRUNO', 'BONDIOLI EMMA  nata a CARPENEDOLO (BS) il 25/06/1949', 'BOZZOLA GIOVANNI']
+     owner_3_cf: ['BNDBRN51D05B817K', 'BNDMME49H65B817Q', 'BZZGNN54M10B817G']
+     owner_3_quota: ['missing', '1/8', '9/54']
+     owner_4_name: ['BONDIOLI DANIELE', 'BONDIOLI GIOVANNI', 'BOZZOLA MARIO']
+     owner_4_cf: ['BNDDNL64P25B817Z', 'BNDGNN47T04B817G', 'BZZMRA75M04C312C']
+     owner_4_quota: ['1/8', '1/8', '2/54']
+     owner_5_name: ['BONDIOLI FRANCO', 'BONDIOLI GIULIETTA', 'BOZZOLA SILVIA']
+     owner_5_cf: ['BNDFNC61T04B817U', 'BNDGTT56H52B817N', 'BZZSLV77R59C312I']
+     owner_5_quota: ['missing', '1/8', '2/54']
+     owner_6_name: ['BONDIOLI GIACOMO', 'BONDIOLI OTTAVIA', 'BOZZOLA TIZIANO']
+     owner_6_cf: ['BNDGCM68A29B817Y', 'BNDTTV50P61B817E', 'BZZTZN84C07F471N']
+     owner_6_quota: ['1/8', '1/8', '2/54']
+     owner_7_name: ['BONDIOLI GIUSEPPE', 'BONDIOLI RITA', 'EOLI AGNESE']
+     owner_7_cf: ['BNDGPP58S13B817T', 'BNDRTI53T60B817E', 'LEOGNS54A55C118R']
+     owner_7_quota: ['missing', '1/8', '9/54']
+     owner_8_name: ['BONDIOLI LIVIO', 'BONDIOLI STEFANO', 'SCOTTO DI CLEMENTE GIUSEPPINA']
+     owner_8_cf: ['BNDLVI49A05B817P', 'BNDSFN61E28F471B', 'SCTGPP52C59A535X']
+     owner_8_quota: ['missing', '1/8', '12/54']
+     owner_9_name: ['BONDIOLI STEFANO', nan, nan]
+     owner_9_cf: ['BNDSFN55D14B817H', nan, nan]
+     owner_9_quota: ['missing', nan, nan]
+     owner_10_name: ['FERRARI ONORINA', nan, nan]
+     owner_10_cf: ['FRRNRN57M66B817N', nan, nan]
+     owner_10_quota: ['missing', nan, nan]
+     additional_owners: ['...and 3 more owners', nan, nan]
+     ownership_summary: ['10 shown + 3 more = 13 total', 'All 8 owners shown', 'All 8 owners shown']
+
+🔍 SHEET: Address_Quality_Distribution
+========================================
+   Rows: 4
+   Columns: 10
+   Column names:
+      1. Quality_Level
+      2. Count
+      3. Percentage
+      4. Processing_Type
+      5. Business_Value
+      6. Automation_Level
+      7. Routing_Decision
+      8. CP
+      9. comune
+     10. provincia
+
+   Sample data (first 3 rows):
+     Quality_Level: ['ULTRA_HIGH', 'HIGH', 'MEDIUM']
+     Count: [271, 19, 268]
+     Percentage: [42.2, 3.0, 41.7]
+     Processing_Type: ['Zero Touch', 'Quick Review', 'Standard Review']
+     Business_Value: ['Immediate print ready', 'Minimal validation needed', 'Normal processing required']
+     Automation_Level: ['Fully-Auto', 'Semi-Auto', 'Manual']
+     Routing_Decision: ['Direct Mail', 'Direct Mail', 'Mixed (Direct Mail + Agency)']
+     CP: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     comune: ['Casalpusterlengo; Fombio; Ospedaletto Lodigiano; Carpenedolo; Castiglione Delle Stiviere; Montichiari', 'Casalpusterlengo; Fombio; Ospedaletto Lodigiano; Carpenedolo; Castiglione Delle Stiviere; Montichiari', 'Casalpusterlengo; Fombio; Ospedaletto Lodigiano; Carpenedolo; Castiglione Delle Stiviere; Montichiari']
+     provincia: [nan, nan, nan]
+
+🔍 SHEET: Enhanced_Funnel_Analysis
+========================================
+   Rows: 9
+   Columns: 13
+   Column names:
+      1. Funnel_Type
+      2. Stage
+      3. Count
+      4. Hectares
+      5. Conversion / Multiplier
+      6. Retention_Rate
+      7. Stage_Conversion_Rate
+      8. Business_Rule
+      9. Automation_Level
+     10. Process_Notes
+     11. CP
+     12. comune
+     13. provincia
+
+   Sample data (first 3 rows):
+     Funnel_Type: ['Land Acquisition', 'Land Acquisition', 'Land Acquisition']
+     Stage: ['1. Input Parcels', '2. Ownership Data Retrieved', '3. Parcels w/ Private Owners']
+     Count: [228, 225, 183]
+     Hectares: [356.2, 354.3, 300.8]
+     Conversion / Multiplier: [nan, 98.7, 81.3]
+     Retention_Rate: [100.0, 98.7, 80.3]
+     Stage_Conversion_Rate: [nan, nan, nan]
+     Business_Rule: ['Parcels selected for acquisition analysis by the Land Acquisition team.', 'System successfully retrieves ownership data from the Italian Land Registry API.', 'Filters for parcels owned by individuals, excluding companies and government entities.']
+     Automation_Level: ['Manual', 'Fully-Auto', 'Fully-Auto']
+     Process_Notes: ['This is the starting point of the campaign, based on user-provided list of target parcels.', 'Represents the API success rate. Parcels are dropped if no data is found.', 'Focuses the acquisition effort on private landowners, who are the primary target for this campaign.']
+     CP: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     comune: ['Casalpusterlengo; Fombio; Ospedaletto Lodigiano; Carpenedolo; Castiglione Delle Stiviere; Montichiari', 'Casalpusterlengo; Fombio; Ospedaletto Lodigiano; Carpenedolo; Castiglione Delle Stiviere; Montichiari', 'Casalpusterlengo; Fombio; Ospedaletto Lodigiano; Carpenedolo; Castiglione Delle Stiviere; Montichiari']
+     provincia: [nan, nan, nan]
+
+🔍 SHEET: All_Validation_Ready
+========================================
+   Rows: 642
+   Columns: 42
+   Column names:
+      1. tipo_catasto
+      2. CP
+      3. provincia_input
+      4. comune_input
+      5. foglio_input
+      6. particella_input
+      7. Area
+      8. cognome
+      9. nome
+     10. data_nascita
+     11. luogo_nascita
+     12. sesso
+     13. cf
+     14. quota
+     15. ubicazione
+     16. catasto
+     17. titolarita
+     18. provincia
+     19. comune
+     20. codice_catastale
+     21. foglio
+     22. particella
+     23. classamento
+     24. Tipo_Proprietario
+     25. cleaned_ubicazione
+     26. Poste_Address
+     27. Geocoded_Address_Italian
+     28. Street_Name
+     29. Street_Number
+     30. Postal_Code
+     31. City
+     32. Province_Name
+     33. Province_Code
+     34. Region
+     35. Sub_Locality
+     36. Country
+     37. Country_Code
+     38. Latitude
+     39. Longitude
+     40. Address_Confidence
+     41. Best_Address
+     42. Quality_Notes
+
+   Sample data (first 3 rows):
+     tipo_catasto: ['T', 'T', 'T']
+     CP: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     provincia_input: ['LO', 'LO', 'LO']
+     comune_input: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     foglio_input: [20, 20, 20]
+     particella_input: [49, 49, 49]
+     Area: [6.73, 6.73, 6.73]
+     cognome: ['CALDERARA', 'CALDERARA', 'CALDERARA']
+     nome: ['ANTONIO', 'ANTONIO', 'ANTONIO']
+     data_nascita: ['14/11/1967', '14/11/1967', '14/11/1967']
+     luogo_nascita: ['LODI (LO)', 'LODI (LO)', 'LODI (LO)']
+     sesso: ['M', 'M', 'M']
+     cf: ['CLDNTN67S14E648T', 'CLDNTN67S14E648T', 'CLDNTN67S14E648T']
+     quota: ['1/1', '1/1', '1/1']
+     ubicazione: ['CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI Piano T - 1', 'CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC Piano S1 - T-1', 'TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC Piano T-1']
+     catasto: ['F', 'F', 'F']
+     titolarita: ["Proprieta' per 1/1", "Proprieta' per 1000/1000", "Proprieta' per 1000/1000"]
+     provincia: ['LO', 'LO', 'LO']
+     comune: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     codice_catastale: ['B910', 'B910', 'L125']
+     foglio: [16, 16, 6]
+     particella: [22, 299, 119]
+     classamento: ['Cat.A/4', 'Cat.A/2', 'Cat.A/3']
+     Tipo_Proprietario: ['Privato', 'Privato', 'Privato']
+     cleaned_ubicazione: ['CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI', 'CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC', 'TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC']
+     Poste_Address: [26841, 26841, 87064]
+     Geocoded_Address_Italian: ['Via Guido Miglioli, 26841 Casalpusterlengo LO', 'Cascina Tesoro, 26841 Casalpusterlengo LO', 'Strada Provinciale, 87064 Terranova da Sibari CS']
+     Street_Name: ['Via Guido Miglioli', 'Cascina Tesoro', 'Strada Provinciale']
+     Street_Number: [nan, nan, nan]
+     Postal_Code: [26841, 26841, 87064]
+     City: ['Casalpusterlengo', 'Casalpusterlengo', 'Terranova da Sibari']
+     Province_Name: ['Lodi', 'Lodi', 'Cosenza']
+     Province_Code: ['LO', 'LO', 'CS']
+     Region: ['Lombardia', 'Lombardia', 'Calabria']
+     Sub_Locality: [nan, nan, nan]
+     Country: ['Italia', 'Italia', 'Italia']
+     Country_Code: ['IT', 'IT', 'IT']
+     Latitude: [45.19289, 45.19425, 39.65041]
+     Longitude: [9.64967, 9.65725, 16.40314]
+     Address_Confidence: ['LOW', 'MEDIUM', 'LOW']
+     Best_Address: [nan, 'CASALPUSTERLENGO(LO) CASCINA TESORO n. SNC', 'TERRANOVA DEI PASSERINI(LO) STRADA PROVINCIALE 213 n. SNC']
+     Quality_Notes: ['No street number available in any source', 'SNC address - province match verified', 'SNC address - geocoding failed or province mismatch']
+
+🔍 SHEET: Final_Mailing_List
+========================================
+   Rows: 303
+   Columns: 9
+   Column names:
+      1. Municipality
+      2. Foglio
+      3. Particella
+      4. Parcels
+      5. Full_Name
+      6. cf
+      7. Mailing_Address
+      8. Addresses_Per_Owner
+      9. Address_Sequence
+
+   Sample data (first 3 rows):
+     Municipality: ['Carpenedolo (BS)', 'Carpenedolo (BS)', 'Carpenedolo (BS)']
+     Foglio: ['31', '31', '23']
+     Particella: ['443', '443', '297']
+     Parcels: ['31-443', '31-443', '23-297']
+     Full_Name: ['BICELLI PALMIRA', 'BICELLI PALMIRA', 'BODINI TIZIANA']
+     cf: ['BCLPMR57R52F471L', 'BCLPMR57R52F471L', 'BDNTZN63L49B817H']
+     Mailing_Address: ["CARPENEDOLO(BS) LOCALITA' TAGLIE n. 40", 'Via Aurelio Mutti, 9, 25018 Montichiari BS', 'Via 4 Novembre, 20, 25013 Carpenedolo BS']
+     Addresses_Per_Owner: [2, 2, 2]
+     Address_Sequence: [1, 2, 1]
+
+🔍 SHEET: All_Companies_Found
+========================================
+   Rows: 37
+   Columns: 18
+   Column names:
+      1. tipo_catasto
+      2. CP
+      3. provincia_input
+      4. comune_input
+      5. foglio_input
+      6. particella_input
+      7. Area
+      8. denominazione
+      9. cognome
+     10. cf
+     11. quota
+     12. provincia
+     13. comune
+     14. codice_catastale
+     15. foglio
+     16. particella
+     17. Tipo_Proprietario
+     18. pec_email
+
+   Sample data (first 3 rows):
+     tipo_catasto: ['T', 'T', 'T']
+     CP: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     provincia_input: ['LO', 'LO', 'LO']
+     comune_input: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     foglio_input: [20, 30, 29]
+     particella_input: [68, 1158, 199]
+     Area: [2.79, 2.57, 4.39]
+     denominazione: ["SOCIETA' AGRICOLA LA PICCOLA SOCIETA' SEMPLICE con sede in TERRANOVA DEI PASSERINI (LO)", "COSTE DELLA CHIESA SOCIETA' SEMPLICE - SOCIETA' AGRICOLA con sede in SOMAGLIA (LO)", "COSTE DELLA CHIESA SOCIETA' SEMPLICE - SOCIETA' AGRICOLA con sede in SOMAGLIA (LO)"]
+     cognome: ["SOCIETA' AGRICOLA LA PICCOLA SOCIETA' SEMPLICE con sede in TERRANOVA DEI PASSERINI (LO)", "COSTE DELLA CHIESA SOCIETA' SEMPLICE - SOCIETA' AGRICOLA con sede in SOMAGLIA (LO)", "COSTE DELLA CHIESA SOCIETA' SEMPLICE - SOCIETA' AGRICOLA con sede in SOMAGLIA (LO)"]
+     cf: [9785390965, 7206730157, 7206730157]
+     quota: ['1/1', '1/1', '1/1']
+     provincia: ['LO', 'LO', 'LO']
+     comune: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     codice_catastale: [nan, nan, nan]
+     foglio: [20, 30, 29]
+     particella: [68, 1158, 199]
+     Tipo_Proprietario: ['Azienda', 'Azienda', 'Azienda']
+     pec_email: ['SOCIETAAGRICOLALAPICCOLA@PEC.IT', 'COSTE.DELLA.CHIESA@LEGALMAIL.IT', 'COSTE.DELLA.CHIESA@LEGALMAIL.IT']
+
+🔍 SHEET: Campaign_Summary
+========================================
+   Rows: 6
+   Columns: 21
+   Column names:
+      1. CP
+      2. comune
+      3. Input_Parcels
+      4. Input_Area_Ha
+      5. After_API_Parcels
+      6. Property_Data_Retrieved_Rate
+      7. Unique_Owners_on_Target_Parcels
+      8. Landowners_Found
+      9. Company_Owners
+     10. Hectares_Direct_Mail
+     11. After_API_Area_Ha
+     12. Private_Owner_Parcels
+     13. Private_Owner_Area_Ha
+     14. Company_Owner_Parcels
+     15. Company_Owner_Area_Ha
+     16. Residential_Contact_Parcels
+     17. After_CatA_Filter_Area_Ha
+     18. Direct_Mail_Final_Contacts
+     19. Direct_Mail_Final_Area_Ha
+     20. Agency_Final_Contacts
+     21. Agency_Final_Area_Ha
+
+   Sample data (first 3 rows):
+     CP: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     comune: ['Casalpusterlengo', 'Fombio', 'Ospedaletto Lodigiano']
+     Input_Parcels: [10, 9, 3]
+     Input_Area_Ha: [32.13, 48.32, 33.67]
+     After_API_Parcels: [10, 7, 3]
+     Property_Data_Retrieved_Rate: [100.0, 77.77777777777779, 100.0]
+     Unique_Owners_on_Target_Parcels: [8, 3, 2]
+     Landowners_Found: [8, 3, 2]
+     Company_Owners: [2, 1, 0]
+     Hectares_Direct_Mail: [18.12, 42.11, 33.67]
+     After_API_Area_Ha: [32.13, 46.54, 33.67]
+     Private_Owner_Parcels: [7, 4, 3]
+     Private_Owner_Area_Ha: [22.38, 42.11, 33.67]
+     Company_Owner_Parcels: [3, 3, 0]
+     Company_Owner_Area_Ha: [9.75, 4.43, 0.0]
+     Residential_Contact_Parcels: [6, 4, 3]
+     After_CatA_Filter_Area_Ha: [18.12, 42.11, 33.67]
+     Direct_Mail_Final_Contacts: [20, 6, 8]
+     Direct_Mail_Final_Area_Ha: [18.1, 42.1, 33.7]
+     Agency_Final_Contacts: [10, 3, 0]
+     Agency_Final_Area_Ha: [18.12, 42.11, 24.67]
+
+🔍 SHEET: Owners_Normalized
+========================================
+   Rows: 426
+   Columns: 9
+   Column names:
+      1. comune
+      2. CP
+      3. foglio_input
+      4. particella_input
+      5. parcel_area_ha
+      6. owner_name
+      7. owner_cf
+      8. quota
+      9. owner_type
+
+   Sample data (first 3 rows):
+     comune: ['Carpenedolo', 'Carpenedolo', 'Carpenedolo']
+     CP: ['Castiglione', 'Castiglione', 'Castiglione']
+     foglio_input: [1, 1, 1]
+     particella_input: [15, 16, 16]
+     parcel_area_ha: [0.77, 0.51, 0.51]
+     owner_name: ['LA LEONESSA S.P.A con sede in CARPENEDOLO (BS)', 'ASTORI FORTUNATO', 'ASTORI GIANDOMENICO']
+     owner_cf: ['02199340981', 'STRFTN60A25B817K', 'STRGDM70A08B157U']
+     quota: ['1/1', '1/2', '1/2']
+     owner_type: ['Azienda', 'Privato', 'Privato']
+
+🔍 SHEET: All_Raw_Data
+========================================
+   Rows: 2975
+   Columns: 28
+   Column names:
+      1. tipo_catasto
+      2. CP
+      3. provincia_input
+      4. comune_input
+      5. foglio_input
+      6. particella_input
+      7. Area
+      8. denominazione
+      9. cognome
+     10. nome
+     11. data_nascita
+     12. luogo_nascita
+     13. sesso
+     14. cf
+     15. quota
+     16. immobili_count
+     17. ubicazione
+     18. Maps_link
+     19. catasto
+     20. titolarita
+     21. provincia
+     22. comune
+     23. codice_catastale
+     24. foglio
+     25. particella
+     26. classamento
+     27. cadastral_reference
+     28. Tipo_Proprietario
+
+   Sample data (first 3 rows):
+     tipo_catasto: ['T', 'T', 'T']
+     CP: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     provincia_input: ['LO', 'LO', 'LO']
+     comune_input: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     foglio_input: [20, 20, 20]
+     particella_input: [49, 49, 49]
+     Area: [6.73, 6.73, 6.73]
+     denominazione: [nan, nan, nan]
+     cognome: ['CALDERARA', 'CALDERARA', 'CALDERARA']
+     nome: ['ANTONIO', 'ANTONIO', 'ANTONIO']
+     data_nascita: ['14/11/1967', '14/11/1967', '14/11/1967']
+     luogo_nascita: ['LODI (LO)', 'LODI (LO)', 'LODI (LO)']
+     sesso: ['M', 'M', 'M']
+     cf: ['CLDNTN67S14E648T', 'CLDNTN67S14E648T', 'CLDNTN67S14E648T']
+     quota: ['1/1', '1/1', '1/1']
+     immobili_count: [8, 8, 8]
+     ubicazione: ['CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI Piano T - 1', 'CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI Piano T - 1', 'CASALPUSTERLENGO(LO) VIA GUIDO MIGLIOLI Piano 1']
+     Maps_link: ['https://www.google.com/maps/search/?api=1&query=CASALPUSTERLENGO%28LO%29%20VIA%20GUIDO%20MIGLIOLI%20Piano%20T%20-%201', 'https://www.google.com/maps/search/?api=1&query=CASALPUSTERLENGO%28LO%29%20VIA%20GUIDO%20MIGLIOLI%20Piano%20T%20-%201', 'https://www.google.com/maps/search/?api=1&query=CASALPUSTERLENGO%28LO%29%20VIA%20GUIDO%20MIGLIOLI%20Piano%201']
+     catasto: ['F', 'F', 'F']
+     titolarita: ["Proprieta' per 1/1", "Proprieta' per 1/1", "Proprieta' per 1/1"]
+     provincia: ['LO', 'LO', 'LO']
+     comune: ['Casalpusterlengo', 'Casalpusterlengo', 'Casalpusterlengo']
+     codice_catastale: ['B910', 'B910', 'B910']
+     foglio: [16, 16, 16]
+     particella: [22, 22, 22]
+     classamento: ['Cat.A/4', 'Cat.A/4', 'Cat.A/4']
+     cadastral_reference: [nan, nan, nan]
+     Tipo_Proprietario: ['Privato', 'Privato', 'Privato']
+
+📄 INPUT FILE STRUCTURE: data/Input_Castiglione Casalpusterlengo CP.xlsx
+============================================================
+   Available sheets:
+     1. Sheet1
+
+   🔍 SHEET: Sheet1
+   ==============================
+     Rows: 238
+     Columns: 8
+     Column names:
+        1. tipo_catasto
+        2. CP
+        3. provincia
+        4. comune
+        5. foglio
+        6. particella
+        7. Area
+        8. Sezione
+
+     Sample data (first 3 rows):
+       tipo_catasto: ['T', 'T', 'T']
+       CP: ['Castiglione', 'Castiglione', 'Castiglione']
+       provincia: ['BS', 'BS', 'MN']
+       comune: ['Carpenedolo', 'Carpenedolo', 'Castiglione Delle Stiviere']
+       foglio: [3, 3, 29]
+       particella: [85, 115, 418]
+       Area: [3.86, 1.67, 1.61]
+       Sezione: [nan, nan, nan]
+
+💡 SUMMARY:
+========================================
+1. Campaign4_Results.xlsx has 10 sheets
+2. Use this structure for accurate data analysis
+3. Column names and data types are now known
+4. Can create properly informed enhancement analysis

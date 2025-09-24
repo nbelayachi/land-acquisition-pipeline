@@ -9,7 +9,10 @@
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(true)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(python dev_tools/testing/validate_v318_agency_correction.py:*)",
+      "Bash(cp:*)",
+      "Bash(python:*)"
     ],
     "deny": []
   }

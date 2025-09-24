@@ -33,7 +33,29 @@ def validate_metrics(excel_path):
     total_validation_ready_rows = len(df_validation_ready)
     results['Quality Counts Match Validation Sheet'] = (total_quality_count == total_validation_ready_rows)
 
-    # 3. Funnel: Owner Discovery Multiplier
+    # 3. MEDIUM Address Metrics Correction Validation (v3.1.7)
+    try:
+        # Check Final_Mailing_List includes MEDIUM addresses
+        df_final_mailing = pd.read_excel(xls, 'Final_Mailing_List')
+        if 'Address_Confidence' in df_final_mailing.columns:
+            final_mailing_mediums = len(df_final_mailing[df_final_mailing['Address_Confidence'] == 'MEDIUM'])
+            validation_mediums = len(df_validation_ready[df_validation_ready['Address_Confidence'] == 'MEDIUM'])
+            results['MEDIUM Addresses in Final_Mailing_List'] = (final_mailing_mediums == validation_mediums)
+        
+        # Check Direct_Mail_Final_Contacts includes MEDIUM addresses
+        direct_mail_total = df_summary['Direct_Mail_Final_Contacts'].sum()
+        ultra_high_count = len(df_validation_ready[df_validation_ready['Address_Confidence'] == 'ULTRA_HIGH'])
+        high_count = len(df_validation_ready[df_validation_ready['Address_Confidence'] == 'HIGH'])
+        medium_count = len(df_validation_ready[df_validation_ready['Address_Confidence'] == 'MEDIUM'])
+        expected_direct_mail = ultra_high_count + high_count + medium_count
+        
+        results['Direct_Mail_Final_Contacts includes MEDIUM'] = (direct_mail_total == expected_direct_mail)
+        results['Direct_Mail_Final_Contacts Value'] = f"{direct_mail_total} (Expected: {expected_direct_mail})"
+        
+    except Exception as e:
+        results['MEDIUM Address Validation'] = f"Error: {e}"
+
+    # 4. Funnel: Owner Discovery Multiplier
     try:
         land_funnel = df_funnel[df_funnel['Funnel_Type'] == 'Land Acquisition']
         contact_funnel = df_funnel[df_funnel['Funnel_Type'] == 'Contact Processing']

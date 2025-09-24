@@ -25,10 +25,10 @@ Automated Python CLI tool that processes Italian land registry data to identify 
 ### Run a Campaign
 ```bash
 python campaign_launcher.py
-# Streamlined interface: select input file, review analysis, confirm launch
-# Generates configuration automatically
-python land_acquisition_pipeline.py
-# Executes the campaign using latest configuration
+# Streamlined interface: check API balance, select input file, review analysis, confirm launch
+# Generates configuration automatically with cost tracking
+python land_acquisition_pipeline.py --config [generated_config] --start-balance [balance]
+# Executes the campaign with cost tracking (command provided by launcher)
 ```
 
 ### Output Structure (v3.1.5)
@@ -125,6 +125,7 @@ land-acquisition-pipeline/
 │   └── archive/                  ← Historical development files
 ├── completed_campaigns/          ← Campaign output directory
 ├── outputs/                      ← Analysis results and data
+├── visualization_mission/        ← Campaign4 visualization development
 ├── logs/                         ← Pipeline execution logs
 └── cache/                        ← API response cache
 ```
