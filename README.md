@@ -1,8 +1,8 @@
-# 🏠 Land Acquisition Pipeline v3.1.6
+# 🏠 Land Acquisition Pipeline v3.1.8
 
 **Status**: ✅ **PRODUCTION READY** - Enhanced funnel metrics with executive KPIs
-**Last Updated**: July 6, 2025
-**Version**: 3.1.6 (Enhanced Funnel Analytics + Business Intelligence + Modernized Interface)
+**Last Updated**: July 15, 2025
+**Version**: 3.1.8 (Metric alignment + Business Intelligence + Modernized Interface)
 
 ## 📋 **What This Does**
 
@@ -45,12 +45,13 @@ Single file: `[Campaign_Name]_Results.xlsx` with 10 enhanced sheets + PowerBI ex
 - **Campaign_Scorecard**: High-level executive summary
 - **🆕 PowerBI_Dataset.csv**: Business intelligence export for dashboards ✅ Working
 
-## 📊 **Current Status (v3.1.6)**
+## 📊 **Current Status (v3.1.8)**
 
-### 🆕 **New in v3.1.6**
-- **Modernized Campaign Launcher**: Completely rewritten interface (57% code reduction) with current v3.1.5 features
-- **Documentation Reconciliation**: All documents updated for version consistency and broken references fixed
-- **Streamlined User Experience**: Simplified workflow with clear status indicators and accurate output descriptions
+### 🆕 **New in v3.1.8**
+- **Direct Mail Metric Alignment**: `Direct_Mail_Final_Contacts` now counts ULTRA_HIGH, HIGH, and MEDIUM confidence addresses, matching the Final_Mailing_List and executive dashboard.
+- **Agency Metric Consistency**: `Agency_Final_Contacts` focuses on LOW confidence addresses for accurate totals and percentages.
+- **Dashboard Validation**: Pipeline outputs verified against `complete_robust_dashboard.py` to ensure Excel metrics and visualizations stay in sync.
+- **Modernized Campaign Launcher**: Interface updated with the latest version banner and feature list for clear operator messaging.
 
 ### **Recent Features (v3.1.5)**
 - **Enhanced `Final_Mailing_List` Structure**: Improved usability with `cf`, `Addresses_Per_Owner`, and `Address_Sequence` columns, sorted by owner

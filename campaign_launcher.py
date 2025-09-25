@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Land Acquisition Campaign Launcher v3.1.6
+Land Acquisition Campaign Launcher v3.1.8
 Streamlined interface for renewable energy land acquisition campaigns
 Supports enhanced funnel analytics, address quality intelligence, and executive KPIs
 
-@version: 3.1.6 (Enhanced Funnel Analytics + Business Intelligence + Cost Tracking)
+@version: 3.1.8 (Metric alignment + Business Intelligence + Cost Tracking)
 @updated: July 2025
 """
 
@@ -16,7 +16,7 @@ from pathlib import Path
 
 class LandAcquisitionCampaignLauncher:
     def __init__(self):
-        self.version = "3.1.6"
+        self.version = "3.1.8"
         self.load_config()
         
     def load_config(self):
@@ -74,10 +74,11 @@ class LandAcquisitionCampaignLauncher:
         print(f"   • PowerBI Export: {'✅ ENABLED' if powerbi_export else '❌ DISABLED'}")
         print()
         
-        print("🆕 CURRENT FEATURES (v3.1.6):")
+        print("🆕 CURRENT FEATURES (v3.1.8):")
         print("   • Enhanced Final_Mailing_List with owner grouping and sequence numbers")
-        print("   • Refined address classification for better confidence levels") 
+        print("   • Refined address classification for better confidence levels")
         print("   • Business-friendly funnel metrics with executive KPIs")
+        print("   • Corrected Direct_Mail/Agency contact metrics aligned with dashboard outputs")
         print("   • Comprehensive metrics documentation and validation")
         print("   • Zero-touch processing identification (17.4% automation)")
         print("   • Integrated cost tracking with start/end balance prompts")

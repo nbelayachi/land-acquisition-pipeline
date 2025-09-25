@@ -3,7 +3,7 @@
 Enhanced Land Acquisition Pipeline with Geocoding Integration and Funnel Metrics
 Handles complete workflow from single input file to municipality-structured outputs
 ENHANCED: Automatic geocoding, PEC email retrieval, and comprehensive funnel tracking
-VERSION: 2.9.7 (with parcel ownership grouping analysis)
+VERSION: 3.1.8 (direct mail/agency metric alignment and dashboard-ready outputs)
 
 @author: Optimized for CP-Municipality land acquisition workflow with address enhancement
 """
@@ -1150,7 +1150,7 @@ The campaign "{campaign_name}" is complete. Results are in OneDrive and ready fo
 **Key Improvements in this Output:**
 
 - **Cleaner Contacts**: The `Validation_Ready.xlsx` file is now **de-duplicated**. You will only see each unique owner once per unique address, saving you time.
-- **Smarter Addresses (v2.9!)**: Each address now has a quality score (`Address_Confidence`) and a recommended `Routing_Channel` (DIRECT_MAIL or AGENCY) to minimize costs from returned mail.
+- **Smarter Addresses (v3.1!)**: Each address now has a quality score (`Address_Confidence`) and a recommended `Routing_Channel` (DIRECT_MAIL or AGENCY) to minimize costs from returned mail.
 - **SNC Addresses Update**: SNC addresses are now sent to DIRECT_MAIL as postal service knows these small streets well.
 {pec_summary}- **Smarter Summaries**: The `Municipality_Summary` sheet now contains powerful business intelligence metrics with complete funnel tracking.
 - **Funnel Visibility**: New sheets show how many parcels and hectares flow through each processing stage.
@@ -1314,7 +1314,7 @@ Best,
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
-        self.logger.info("Enhanced Land Acquisition Pipeline v2.9 initialized")
+        self.logger.info("Enhanced Land Acquisition Pipeline v3.1.8 initialized")
     
     def setup_directories(self):
         """Create necessary directories"""
@@ -1375,7 +1375,7 @@ Best,
         print(f"📍 Total Parcels: {self.campaign_stats['total_parcels']}")
         print(f"🗺️  Address Enhancement: {'✅ ENABLED' if self.geocoding_enabled else '❌ DISABLED'}")
         print(f"📧 PEC Email Integration: {'✅ ENABLED' if self.pec_enabled else '❌ DISABLED'}")
-        print(f"📊 Funnel Tracking: ✅ ENABLED (v2.9)")
+        print(f"📊 Funnel Tracking: ✅ ENABLED (v3.1.8)")
         
         print("\n📋 CP Structure:")
         for cp, row in cp_summary.iterrows():
@@ -1588,7 +1588,7 @@ Best,
 
     def run_complete_campaign(self, input_file, campaign_name, start_balance=None):
         """v2.9.5: Main method to run the campaign, now aggregates all results into a single file."""
-        print(f"\n🚀 ENHANCED LAND ACQUISITION CAMPAIGN v2.9.5: {campaign_name}")
+        print(f"\n🚀 ENHANCED LAND ACQUISITION CAMPAIGN v3.1.8: {campaign_name}")
         if start_balance is None:
             start_balance = self.get_manual_balance_input("start")
         else:
@@ -1653,7 +1653,7 @@ Best,
             traceback.print_exc()
         self.copy_to_onedrive(campaign_name, campaign_dir)
         
-        print(f"\n✅ ENHANCED CAMPAIGN COMPLETED (v2.9.5)")
+        print(f"\n✅ ENHANCED CAMPAIGN COMPLETED (v3.1.8)")
 
     def create_enhanced_cost_summary(self, campaign_name, campaign_dir):
         """Create enhanced cost summary."""
@@ -1661,7 +1661,7 @@ Best,
         pec_section = f"PEC Integration Enabled: {'Yes' if self.pec_enabled else 'No'}\n"
 
         cost_summary = f"""
-ENHANCED LAND ACQUISITION CAMPAIGN COST SUMMARY v2.9
+ENHANCED LAND ACQUISITION CAMPAIGN COST SUMMARY v3.1.8
 Campaign: {campaign_name}
 Processing Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}
 
@@ -1671,8 +1671,8 @@ End Balance: €{self.campaign_stats['end_balance']:.2f}
 Total Campaign Cost: €{self.campaign_stats['campaign_cost']:.2f}
 
 {geocoding_section}{pec_section}
-Funnel Tracking: Enabled (v2.9)
-SNC Routing: Direct Mail (v2.9)
+Funnel Tracking: Enabled (v3.1.8)
+SNC Routing: Direct Mail (v3.1.8)
 
 📊 PROCESSING STATS:
 Total API Calls: {self.campaign_stats['api_calls']}
@@ -2238,7 +2238,7 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description='Enhanced Land Acquisition Pipeline v2.9')
+    parser = argparse.ArgumentParser(description='Enhanced Land Acquisition Pipeline v3.1.8')
     parser.add_argument('--config', required=True, help='Campaign configuration file')
     parser.add_argument('--start-balance', type=float, help='Starting API balance')
     args = parser.parse_args()
