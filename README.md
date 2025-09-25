@@ -189,6 +189,8 @@ Edit `land_acquisition_config.json`:
 - **Version History**: `doc/CHANGELOG.md`
 - **System Logs**: `logs/land_acquisition_pipeline_[timestamp].log`
 - **Enhanced Features**: `doc/POWERBI_ENHANCEMENT_NOTES.md`
+- **Verification Playbook**: `doc/V318_FEATURE_VERIFICATION_GUIDE.md` – Step-by-step checks for the v3.1.8 confidence-based metrics
 
 ---
 **🎯 Ready for production use. Enhanced funnel analytics with executive KPIs validated and tested. All v3.1.0 features mathematically verified.**
+

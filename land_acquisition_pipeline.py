@@ -1227,28 +1227,13 @@ Best,
             geocoding_success_count = len(validation_ready[validation_ready['Geocoding_Status'] == 'Success'])
         Address_Verification_Rate = (geocoding_success_count / len(validation_ready)) * 100 if len(validation_ready) > 0 else 0
 
-        # v2.9.2: Revised metric calculations
-        direct_mail_contacts = 0
-        agency_contacts = 0
-        hectares_direct_mail = 0.0
-        hectares_agency = 0.0
-        interpolation_risks = 0
-
-        if not validation_ready.empty and 'Address_Confidence' in validation_ready.columns:
-            # REVISED v3.1.7: Direct Mail contacts now include ULTRA_HIGH, HIGH, and MEDIUM confidence addresses
-            direct_mail_df = validation_ready[validation_ready['Address_Confidence'].isin(['ULTRA_HIGH', 'HIGH', 'MEDIUM'])]
-            # REVISED v3.1.8: Agency contacts now count LOW confidence addresses for consistency
-            agency_df = validation_ready[validation_ready['Address_Confidence'] == 'LOW']
-
-            # Count addresses in each channel (v3.1.8: both metrics now count by confidence level)
-            direct_mail_contacts = len(direct_mail_df)
-            agency_contacts = len(agency_df)
-
-            # Sum area of unique parcels in each channel
-            hectares_direct_mail = direct_mail_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
-            hectares_agency = agency_df.drop_duplicates(subset=['foglio_input', 'particella_input'])['Area'].sum()
-
-            interpolation_risks = len(validation_ready[validation_ready['Interpolation_Risk'] == True])
+        # v2.9.2+: Revised metric calculations
+        channels = self.split_contact_channels(validation_ready)
+        direct_mail_contacts = channels["direct_mail_contacts"]
+        agency_contacts = channels["agency_contacts"]
+        hectares_direct_mail = channels["direct_mail_area_ha"]
+        hectares_agency = channels["agency_area_ha"]
+        interpolation_risks = len(validation_ready[validation_ready['Interpolation_Risk'] == True]) if not validation_ready.empty and 'Interpolation_Risk' in validation_ready.columns else 0
 
         companies_with_pec = 0
         pec_success_rate = 0.0
@@ -1353,6 +1338,86 @@ Best,
             "successful_geocoding_recoveries": 0, "pec_enabled": False, "pec_api_calls": 0,
             "pec_found_count": 0
         }
+
+    def split_contact_channels(self, validation_ready_df):
+        """Return consistent direct mail and agency splits using confidence levels."""
+        empty_result = {
+            "direct_mail_df": pd.DataFrame(),
+            "agency_df": pd.DataFrame(),
+            "direct_mail_contacts": 0,
+            "agency_contacts": 0,
+            "total_contacts": 0,
+            "direct_mail_area_ha": 0.0,
+            "agency_area_ha": 0.0,
+        }
+
+        if validation_ready_df is None or validation_ready_df.empty:
+            return empty_result
+
+        df = validation_ready_df.copy()
+
+        direct_mail_mask = None
+        agency_mask = None
+
+        if 'Address_Confidence' in df.columns:
+            direct_mail_mask = df['Address_Confidence'].isin(['ULTRA_HIGH', 'HIGH', 'MEDIUM'])
+            agency_mask = df['Address_Confidence'] == 'LOW'
+        elif 'Routing_Channel' in df.columns:
+            direct_mail_mask = df['Routing_Channel'].str.upper() == 'DIRECT_MAIL'
+            agency_mask = df['Routing_Channel'].str.upper() == 'AGENCY'
+
+        if direct_mail_mask is None or agency_mask is None:
+            return empty_result
+
+        direct_mail_df = df[direct_mail_mask].copy()
+        agency_df = df[agency_mask].copy()
+
+        def _normalise_area(area_series):
+            return pd.to_numeric(area_series.astype(str).str.replace(',', '.'), errors='coerce')
+
+        def _calculate_area(sub_df):
+            if sub_df.empty:
+                return 0.0
+
+            area_column = None
+            if 'Area' in sub_df.columns:
+                area_column = 'Area'
+            elif 'Area_input' in sub_df.columns:
+                area_column = 'Area_input'
+
+            if area_column is None:
+                return 0.0
+
+            parcel_keys = []
+            if 'Parcel_ID' in sub_df.columns:
+                parcel_keys = ['Parcel_ID']
+            elif {'foglio_input', 'particella_input'}.issubset(sub_df.columns):
+                parcel_keys = ['foglio_input', 'particella_input']
+            elif {'foglio', 'particella'}.issubset(sub_df.columns):
+                parcel_keys = ['foglio', 'particella']
+
+            numeric_area = _normalise_area(sub_df[area_column])
+            temp_df = sub_df.assign(_Area=numeric_area)
+
+            if parcel_keys:
+                temp_df = temp_df.drop_duplicates(subset=parcel_keys)
+
+            return float(temp_df['_Area'].sum(skipna=True))
+
+        direct_mail_area = _calculate_area(direct_mail_df)
+        agency_area = _calculate_area(agency_df)
+
+        result = {
+            "direct_mail_df": direct_mail_df,
+            "agency_df": agency_df,
+            "direct_mail_contacts": int(len(direct_mail_df)),
+            "agency_contacts": int(len(agency_df)),
+            "total_contacts": int(len(direct_mail_df) + len(agency_df)),
+            "direct_mail_area_ha": direct_mail_area,
+            "agency_area_ha": agency_area,
+        }
+
+        return result
     
     def analyze_input_structure(self, df):
         """Analyze the CP-Municipality structure of input data"""
@@ -2056,26 +2121,33 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         scorecard_data = []
 
         if not df_all_validation_ready.empty:
-            direct_mail_df = df_all_validation_ready[df_all_validation_ready['Routing_Channel'] == 'DIRECT_MAIL'].copy()
+            contact_channels = self.split_contact_channels(df_all_validation_ready)
+            direct_mail_df = contact_channels["direct_mail_df"]
             if not direct_mail_df.empty:
-                direct_mail_parcels = direct_mail_df.drop_duplicates(subset=['foglio_input', 'particella_input'])
+                if 'Parcel_ID' in direct_mail_df.columns:
+                    direct_mail_parcels = direct_mail_df.drop_duplicates(subset=['Parcel_ID'])
+                else:
+                    direct_mail_parcels = direct_mail_df.drop_duplicates(subset=['foglio_input', 'particella_input'])
                 scorecard_data.append({
                     'Category': 'Direct Mail Campaign',
                     'Unique People': direct_mail_df['cf_owner'].nunique(),
                     'Mailings Sent': len(direct_mail_df),
                     'Parcels Affected': len(direct_mail_parcels),
-                    'Hectares Affected': pd.to_numeric(direct_mail_parcels['Area_input'].astype(str).str.replace(',', '.'), errors='coerce').sum()
+                    'Hectares Affected': contact_channels["direct_mail_area_ha"]
                 })
-            
-            agency_df = df_all_validation_ready[df_all_validation_ready['Routing_Channel'] == 'AGENCY'].copy()
+
+            agency_df = contact_channels["agency_df"]
             if not agency_df.empty:
-                agency_parcels = agency_df.drop_duplicates(subset=['foglio_input', 'particella_input'])
+                if 'Parcel_ID' in agency_df.columns:
+                    agency_parcels = agency_df.drop_duplicates(subset=['Parcel_ID'])
+                else:
+                    agency_parcels = agency_df.drop_duplicates(subset=['foglio_input', 'particella_input'])
                 scorecard_data.append({
                     'Category': 'Agency Review',
                     'Unique People': agency_df['cf_owner'].nunique(),
                     'Mailings Sent': len(agency_df),
                     'Parcels Affected': len(agency_parcels),
-                    'Hectares Affected': pd.to_numeric(agency_parcels['Area_input'].astype(str).str.replace(',', '.'), errors='coerce').sum()
+                    'Hectares Affected': contact_channels["agency_area_ha"]
                 })
 
         if not df_all_companies.empty:
@@ -2158,14 +2230,19 @@ Validation Ready Records: {self.campaign_stats['validation_ready_count']}
         if not df_all_validation_ready.empty:
             # Create the Campaign Scorecard - PRESERVED
             df_scorecard = self.create_campaign_scorecard(df_all_validation_ready, df_all_companies)
-            
+
             # --- Create the Strategic Mailing List DataFrame (Corrected Logic) ---
             if 'Parcel_ID' in df_all_validation_ready.columns and 'cf_owner' in df_all_validation_ready.columns:
-                high_confidence_contacts = df_all_validation_ready[df_all_validation_ready['Address_Confidence'].isin(['ULTRA_HIGH', 'HIGH', 'MEDIUM'])]
-                owner_to_addresses = high_confidence_contacts.groupby('cf_owner')['Best_Address'].unique().apply(list).to_dict()
-                
+                contact_channels = self.split_contact_channels(df_all_validation_ready)
+                high_confidence_contacts = contact_channels["direct_mail_df"]
+
+                if not high_confidence_contacts.empty and 'Best_Address' in high_confidence_contacts.columns:
+                    owner_to_addresses = high_confidence_contacts.groupby('cf_owner')['Best_Address'].unique().apply(list).to_dict()
+                else:
+                    owner_to_addresses = {}
+
                 owners_with_good_address = df_all_validation_ready[df_all_validation_ready['cf_owner'].isin(owner_to_addresses.keys())].copy()
-                
+
                 grouped_by_owner = owners_with_good_address.groupby('cf_owner').agg(
                     Full_Name=('denominazione_owner', 'first'),
                     Elenco_Parcel_ID=('Parcel_ID', lambda x: '; '.join(x.unique()))
